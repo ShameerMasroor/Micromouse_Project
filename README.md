@@ -1,4 +1,5 @@
 # Micromouse_Project
-Our repository for micromouse strp code and files.
+Maze Marvels: Micromouse Summer Tehqeeq Research Project
 <p> Group Members:</p>
-<p> Shameer, Abdullah, Bilal, Maleeha</p>
+<p> Shameer, Maleeha, Abdullah, Bilal, </p>
+<p>SMAB!</p>
