@@ -12,7 +12,7 @@ set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|accel0" "/soc/i2c@4
 set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|die-temp0" "/dietemp")
 set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|volt-sensor0" "/vref")
 set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|volt-sensor1" "/vbat")
-set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|led3" "/leds/led_5")
+set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|led0" "/leds/led_5")
 set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|led1" "/leds/led_7")
 set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|led2" "/leds/led_ext")
 set_target_properties(devicetree_target PROPERTIES "DT_ALIAS|sw0" "/gpio_keys/button")

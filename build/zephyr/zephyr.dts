@@ -14,9 +14,9 @@
 		zephyr,canbus = &can1;
 	};
 	aliases {
+		led0 = &orange_led_5;
 		led1 = &green_led_7;
 		led2 = &led_ext;
-		led3 = &orange_led_5;
 		sw0 = &user_button;
 		magn0 = &lsm303dlhc_magn;
 		watchdog0 = &iwdg;
