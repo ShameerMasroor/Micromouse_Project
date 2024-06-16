@@ -171,13 +171,136 @@ via threads. Good luck to us!
 
 //code for on-board button implementation
 //----------------------------------------------------------------------------------------------
+// #include <zephyr/kernel.h>
+// #include <zephyr/device.h>
+// #include <zephyr/drivers/gpio.h>
+// #include <zephyr/sys/printk.h>
+// #include <zephyr/sys/__assert.h>
+// #include <string.h>
+// #include <zephyr/drivers/uart.h> //be careful about the directory you choose!!!
+// #include <stdio.h>
+
+// /* size of stack area used by each thread */
+// #define STACKSIZE 2048
+
+// /* scheduling priority used by each thread */
+// #define PRIORITY 7
+
+// #define LED0_NODE DT_ALIAS(led0)
+// #define BTN0_NODE DT_ALIAS(sw0)
+// #define UART0_NODE DT_NODELABEL(usart1) 
+// // #define UART1_NODE DT_ALIAS(uart1)
+
+
+// #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
+// #error "Unsupported board: led0 devicetree alias is not defined"
+// #endif
+
+// #if !DT_NODE_HAS_STATUS(BTN0_NODE, okay)
+// #error "Unsupported board: led1 devicetree alias is not defined"
+// #endif
+
+
+// #if !DT_NODE_HAS_STATUS(UART0_NODE, okay)
+// #error "Unsupported board: uart0 devicetree alias is not defined"
+// #endif
+
+
+// struct led {
+// 	struct gpio_dt_spec spec;
+// 	uint8_t num;
+// };
+
+// struct button {
+// 	struct gpio_dt_spec btn_spec;
+// 	uint8_t btn_num;
+// };
+
+// static const struct led led0 = {
+// 	.spec = GPIO_DT_SPEC_GET_OR(LED0_NODE, gpios, {0}),
+// 	.num = 0,
+// };
+
+// static const struct button btn0 = {
+// 	.btn_spec = GPIO_DT_SPEC_GET_OR(BTN0_NODE, gpios, {0}),
+// 	.btn_num = 0,
+// };
+
+// static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
+
+// void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
+// {
+//     switch (evt->type) {
+//     case UART_TX_DONE:
+//         printk("UART_TX_DONE\n");
+//         break;
+//     case UART_RX_RDY:
+//         printk("Received data: %s\n", evt->data.rx.buf);
+//         break;
+//     default:
+//         break;
+//     }
+// }
+
+// void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uint32_t id)
+// {
+// 	const struct gpio_dt_spec *spec = &led->spec;
+// 	const struct gpio_dt_spec *btn_spec = &btn->btn_spec;
+	
+// 	int ret_led;
+// 	int ret_btn;
+
+	
+
+// 	ret_led = gpio_pin_configure_dt(spec, GPIO_OUTPUT);
+// 	ret_btn = gpio_pin_configure_dt(btn_spec, GPIO_INPUT);
+
+// 	while (1) {
+//     int input_state = gpio_pin_get(btn_spec->port, btn_spec->pin); // Read input pin state
+
+//     // Check if input is high (assuming high means active)
+//     if (input_state) {
+//         gpio_pin_set(spec->port, spec->pin, 1); // Turn on LED
+// 		printk("\nLED is on\n");
+//     } 
+
+// 	else {
+//         gpio_pin_set(spec->port, spec->pin, 0); // Turn off LED
+// 		printk("\nLED is off\n");
+//         printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
+//     }
+// 	// k_msleep(100);
+// }
+// }
+
+// void blink0(void)     //for led0
+// {
+// 	blink(&btn0, 0, &led0,0);
+// }
+
+
+// K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL,
+// 		PRIORITY, 0, 0);
+// // K_THREAD_DEFINE(blink1_id, STACKSIZE, blink1, NULL, NULL, NULL,
+// // 		PRIORITY, 0, 0);
+// // K_THREAD_DEFINE(blink2_id, STACKSIZE, blink2, NULL, NULL, NULL,
+// // 		PRIORITY, 0, 0);
+
+
+// //testing UART capabilities
+// //---------------------------------------------------------------------------------------------
+// // 
+
+
+//code for UART implementation
+
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/__assert.h>
 #include <string.h>
-#include <zephyr/drivers/uart.h> //be careful about the directory you choose!!!
+#include <zephyr/drivers/uart.h>
 #include <stdio.h>
 
 /* size of stack area used by each thread */
@@ -188,84 +311,116 @@ via threads. Good luck to us!
 
 #define LED0_NODE DT_ALIAS(led0)
 #define BTN0_NODE DT_ALIAS(sw0)
-// #define UART1_NODE DT_ALIAS(uart1)
-
+#define UART0_NODE DT_NODELABEL(usart1)  // as in our device tree
 
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
 #endif
 
 #if !DT_NODE_HAS_STATUS(BTN0_NODE, okay)
-#error "Unsupported board: led1 devicetree alias is not defined"
+#error "Unsupported board: btn0 devicetree alias is not defined"
 #endif
 
+#if !DT_NODE_HAS_STATUS(UART0_NODE, okay)
+#error "Unsupported board: uart0 devicetree alias is not defined"
+#endif
 
 struct led {
-	struct gpio_dt_spec spec;
-	uint8_t num;
+    struct gpio_dt_spec spec;
+    uint8_t num;
 };
 
 struct button {
-	struct gpio_dt_spec btn_spec;
-	uint8_t btn_num;
+    struct gpio_dt_spec btn_spec;
+    uint8_t btn_num;
 };
 
 static const struct led led0 = {
-	.spec = GPIO_DT_SPEC_GET_OR(LED0_NODE, gpios, {0}),
-	.num = 0,
+    .spec = GPIO_DT_SPEC_GET_OR(LED0_NODE, gpios, {0}),
+    .num = 0,
 };
 
 static const struct button btn0 = {
-	.btn_spec = GPIO_DT_SPEC_GET_OR(BTN0_NODE, gpios, {0}),
-	.btn_num = 0,
+    .btn_spec = GPIO_DT_SPEC_GET_OR(BTN0_NODE, gpios, {0}),
+    .btn_num = 0,
 };
 
+static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
+
+void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
+{
+	if (!device_is_ready(uart_dev)) {
+        printk("UART device not found!");
+        return;
+    }
+
+    struct uart_config uart_cfg = {
+        .baudrate = 115200,
+        .parity = UART_CFG_PARITY_NONE,
+        .stop_bits = UART_CFG_STOP_BITS_1,
+        .data_bits = UART_CFG_DATA_BITS_8,
+        .flow_ctrl = UART_CFG_FLOW_CTRL_NONE,
+    };
+
+    int err = uart_configure(uart_dev, &uart_cfg);
+    if (err) {
+        printk("Failed to configure UART device!");
+        return;
+    }
+
+    printk("UART initialized.\n");
+    switch (evt->type) {
+    case UART_TX_DONE:
+        printk("UART_TX_DONE\n");
+        break;
+    case UART_RX_RDY:
+        printk("Received data: %s\n", evt->data.rx.buf);
+        break;
+    default:
+        break;
+    }
+}
 
 void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uint32_t id)
 {
-	const struct gpio_dt_spec *spec = &led->spec;
-	const struct gpio_dt_spec *btn_spec = &btn->btn_spec;
-	
-	int ret_led;
-	int ret_btn;
+    const struct gpio_dt_spec *spec = &led->spec;
+    const struct gpio_dt_spec *btn_spec = &btn->btn_spec;
 
-	
+    int ret_led;
+    int ret_btn;
 
-	ret_led = gpio_pin_configure_dt(spec, GPIO_OUTPUT);
-	ret_btn = gpio_pin_configure_dt(btn_spec, GPIO_INPUT);
+    ret_led = gpio_pin_configure_dt(spec, GPIO_OUTPUT);
+    ret_btn = gpio_pin_configure_dt(btn_spec, GPIO_INPUT);
 
-	while (1) {
-    int input_state = gpio_pin_get(btn_spec->port, btn_spec->pin); // Read input pin state
+    while (1) {
+        int input_state = gpio_pin_get(btn_spec->port, btn_spec->pin); // Read input pin state
 
-    // Check if input is high (assuming high means active)
-    if (input_state) {
-        gpio_pin_set(spec->port, spec->pin, 1); // Turn on LED
-		printk("\nLED is on\n");
-    } 
-
-	else {
-        gpio_pin_set(spec->port, spec->pin, 0); // Turn off LED
-		printk("\nLED is off\n");
-        printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
+        // Check if input is high (assuming high means active)
+        if (input_state) {
+            gpio_pin_set(spec->port, spec->pin, 1); // Turn on LED
+            printk("\nLED is on\n");
+        } else {
+            gpio_pin_set(spec->port, spec->pin, 0); // Turn off LED
+            printk("\nLED is off\n"); //lowest overhead - best to use
+            printf("Hello World!\n"); //contains formatting capabilities - highest overhead
+            uart_poll_out(uart_dev, 'H');  // Send a character over UART, one character at a time - blocking in nature
+        }
+        // k_msleep(100);
     }
-	// k_msleep(100);
-}
 }
 
 void blink0(void)     //for led0
 {
-	blink(&btn0, 0, &led0,0);
+    blink(&btn0, 0, &led0, 0);
+}
+
+void init_uart(void)  //you do not need this. You made the thread work using simply uart callback too
+{
+	uart_callback_set(uart_dev, uart_cb, NULL);
 }
 
 
-K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL,
-		PRIORITY, 0, 0);
-// K_THREAD_DEFINE(blink1_id, STACKSIZE, blink1, NULL, NULL, NULL,
-// 		PRIORITY, 0, 0);
-// K_THREAD_DEFINE(blink2_id, STACKSIZE, blink2, NULL, NULL, NULL,
-// 		PRIORITY, 0, 0);
 
 
-//testing UART capabilities
-//---------------------------------------------------------------------------------------------
-// 
+K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
