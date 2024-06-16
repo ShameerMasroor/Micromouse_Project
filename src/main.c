@@ -63,12 +63,122 @@ via threads. Good luck to us!
 
 //Thread implementation code
 
+// #include <zephyr/kernel.h>
+// #include <zephyr/device.h>
+// #include <zephyr/drivers/gpio.h>
+// #include <zephyr/sys/printk.h>
+// #include <zephyr/sys/__assert.h>
+// #include <string.h>
+
+// /* size of stack area used by each thread */
+// #define STACKSIZE 2048
+
+// /* scheduling priority used by each thread */
+// #define PRIORITY 7
+
+// #define LED0_NODE DT_ALIAS(led0)
+// #define LED1_NODE DT_ALIAS(led1)
+// #define LED2_NODE DT_ALIAS(led2)
+
+// #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
+// #error "Unsupported board: led0 devicetree alias is not defined"
+// #endif
+
+// #if !DT_NODE_HAS_STATUS(LED1_NODE, okay)
+// #error "Unsupported board: led1 devicetree alias is not defined"
+// #endif
+
+// #if !DT_NODE_HAS_STATUS(LED2_NODE, okay)
+// #error "Unsupported board: led1 devicetree alias is not defined"
+// #endif
+
+
+
+// struct led {
+// 	struct gpio_dt_spec spec;
+// 	uint8_t num;
+// };
+
+// static const struct led led0 = {
+// 	.spec = GPIO_DT_SPEC_GET_OR(LED0_NODE, gpios, {0}),
+// 	.num = 0,
+// };
+
+// static const struct led led1 = {
+// 	.spec = GPIO_DT_SPEC_GET_OR(LED1_NODE, gpios, {0}),
+// 	.num = 1,
+// };
+
+// static const struct led led2 = {
+// 	.spec = GPIO_DT_SPEC_GET_OR(LED2_NODE, gpios, {0}),
+// 	.num = 2,
+// };
+
+// void blink(const struct led *led, uint32_t sleep_ms, uint32_t id)
+// {
+// 	const struct gpio_dt_spec *spec = &led->spec;
+// 	int cnt = 0;
+// 	int ret;
+
+	
+
+// 	ret = gpio_pin_configure_dt(spec, GPIO_OUTPUT);
+	
+
+// 	while (1) {
+// 		gpio_pin_set(spec->port, spec->pin, cnt % 2); //0 when 2 doesnt divide into cnt, 1 when 2 is a divisor
+
+// 		k_msleep(sleep_ms);
+// 		cnt++;
+// 	}
+// }
+
+// void blink0(void)     //for led0
+// {
+// 	blink(&led0, 100, 0);
+// }
+
+// void blink1(void)    //for led1
+// {
+// 	blink(&led1, 1000, 1);
+// }
+
+// void blink2(void)    //for led1
+// {
+// 	blink(&led2, 500, 2);
+
+// }
+
+// // void blink_runner(void)
+// // {
+// // blink(&led0, 100, 0);
+// // blink(&led1, 1000, 1);
+// // blink(&led2, 500, 2);
+// // }
+
+// // void master(void)
+// // {
+// K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL,
+// 		PRIORITY, 0, 0);
+// K_THREAD_DEFINE(blink1_id, STACKSIZE, blink1, NULL, NULL, NULL,
+// 		PRIORITY, 0, 0);
+// K_THREAD_DEFINE(blink2_id, STACKSIZE, blink2, NULL, NULL, NULL,
+// 		PRIORITY, 0, 0);
+// // }
+
+// K_THREAD_DEFINE(master_thread, STACKSIZE, master, NULL, NULL, NULL,
+// 		PRIORITY, 0, 0);
+
+//code for on-board button implementation
+//----------------------------------------------------------------------------------------------
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/__assert.h>
 #include <string.h>
+#include <zephyr/drivers/uart.h> //be careful about the directory you choose!!!
+#include <stdio.h>
 
 /* size of stack area used by each thread */
 #define STACKSIZE 2048
@@ -77,21 +187,17 @@ via threads. Good luck to us!
 #define PRIORITY 7
 
 #define LED0_NODE DT_ALIAS(led0)
-#define LED1_NODE DT_ALIAS(led1)
-#define LED2_NODE DT_ALIAS(led2)
+#define BTN0_NODE DT_ALIAS(sw0)
+// #define UART1_NODE DT_ALIAS(uart1)
+
 
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
 #endif
 
-#if !DT_NODE_HAS_STATUS(LED1_NODE, okay)
+#if !DT_NODE_HAS_STATUS(BTN0_NODE, okay)
 #error "Unsupported board: led1 devicetree alias is not defined"
 #endif
-
-#if !DT_NODE_HAS_STATUS(LED2_NODE, okay)
-#error "Unsupported board: led1 devicetree alias is not defined"
-#endif
-
 
 
 struct led {
@@ -99,72 +205,67 @@ struct led {
 	uint8_t num;
 };
 
+struct button {
+	struct gpio_dt_spec btn_spec;
+	uint8_t btn_num;
+};
+
 static const struct led led0 = {
 	.spec = GPIO_DT_SPEC_GET_OR(LED0_NODE, gpios, {0}),
 	.num = 0,
 };
 
-static const struct led led1 = {
-	.spec = GPIO_DT_SPEC_GET_OR(LED1_NODE, gpios, {0}),
-	.num = 1,
+static const struct button btn0 = {
+	.btn_spec = GPIO_DT_SPEC_GET_OR(BTN0_NODE, gpios, {0}),
+	.btn_num = 0,
 };
 
-static const struct led led2 = {
-	.spec = GPIO_DT_SPEC_GET_OR(LED2_NODE, gpios, {0}),
-	.num = 2,
-};
 
-void blink(const struct led *led, uint32_t sleep_ms, uint32_t id)
+void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uint32_t id)
 {
 	const struct gpio_dt_spec *spec = &led->spec;
-	int cnt = 0;
-	int ret;
+	const struct gpio_dt_spec *btn_spec = &btn->btn_spec;
+	
+	int ret_led;
+	int ret_btn;
 
 	
 
-	ret = gpio_pin_configure_dt(spec, GPIO_OUTPUT);
-	
+	ret_led = gpio_pin_configure_dt(spec, GPIO_OUTPUT);
+	ret_btn = gpio_pin_configure_dt(btn_spec, GPIO_INPUT);
 
 	while (1) {
-		gpio_pin_set(spec->port, spec->pin, cnt % 2); //0 when 2 doesnt divide into cnt, 1 when 2 is a divisor
+    int input_state = gpio_pin_get(btn_spec->port, btn_spec->pin); // Read input pin state
 
-		k_msleep(sleep_ms);
-		cnt++;
-	}
+    // Check if input is high (assuming high means active)
+    if (input_state) {
+        gpio_pin_set(spec->port, spec->pin, 1); // Turn on LED
+		printk("\nLED is on\n");
+    } 
+
+	else {
+        gpio_pin_set(spec->port, spec->pin, 0); // Turn off LED
+		printk("\nLED is off\n");
+        printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
+    }
+	// k_msleep(100);
+}
 }
 
 void blink0(void)     //for led0
 {
-	blink(&led0, 100, 0);
+	blink(&btn0, 0, &led0,0);
 }
 
-void blink1(void)    //for led1
-{
-	blink(&led1, 1000, 1);
-}
 
-void blink2(void)    //for led1
-{
-	blink(&led2, 500, 2);
-
-}
-
-// void blink_runner(void)
-// {
-// blink(&led0, 100, 0);
-// blink(&led1, 1000, 1);
-// blink(&led2, 500, 2);
-// }
-
-// void master(void)
-// {
 K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL,
 		PRIORITY, 0, 0);
-K_THREAD_DEFINE(blink1_id, STACKSIZE, blink1, NULL, NULL, NULL,
-		PRIORITY, 0, 0);
-K_THREAD_DEFINE(blink2_id, STACKSIZE, blink2, NULL, NULL, NULL,
-		PRIORITY, 0, 0);
-// }
-
-// K_THREAD_DEFINE(master_thread, STACKSIZE, master, NULL, NULL, NULL,
+// K_THREAD_DEFINE(blink1_id, STACKSIZE, blink1, NULL, NULL, NULL,
 // 		PRIORITY, 0, 0);
+// K_THREAD_DEFINE(blink2_id, STACKSIZE, blink2, NULL, NULL, NULL,
+// 		PRIORITY, 0, 0);
+
+
+//testing UART capabilities
+//---------------------------------------------------------------------------------------------
+// 

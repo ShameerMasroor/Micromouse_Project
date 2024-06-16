@@ -113,6 +113,7 @@
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_misc
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_mm
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_modem
+/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_mspi
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_pcie
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_pinctrl
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/zephyr/misc/generated/syscalls_links/include_zephyr_drivers_pm_cpu_ops

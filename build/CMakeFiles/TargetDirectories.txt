@@ -238,8 +238,8 @@
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_renesas/CMakeFiles/rebuild_cache.dir
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_rpi_pico/CMakeFiles/edit_cache.dir
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_rpi_pico/CMakeFiles/rebuild_cache.dir
-/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/silabs/CMakeFiles/edit_cache.dir
-/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/silabs/CMakeFiles/rebuild_cache.dir
+/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_silabs/CMakeFiles/edit_cache.dir
+/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_silabs/CMakeFiles/rebuild_cache.dir
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_st/CMakeFiles/edit_cache.dir
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_st/CMakeFiles/rebuild_cache.dir
 /home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/stm32/CMakeFiles/edit_cache.dir

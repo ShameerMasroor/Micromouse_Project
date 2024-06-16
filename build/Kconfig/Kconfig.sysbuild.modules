@@ -64,7 +64,7 @@ config ZEPHYR_HAL_RENESAS_MODULE
 config ZEPHYR_HAL_RPI_PICO_MODULE
    bool
    default y
-config ZEPHYR_SILABS_MODULE
+config ZEPHYR_HAL_SILABS_MODULE
    bool
    default y
 config ZEPHYR_HAL_ST_MODULE

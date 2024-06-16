@@ -67,9 +67,12 @@ config ZEPHYR_HAL_INFINEON_MODULE
 	bool
 	default y
 endmenu
+menu "hal_intel (/home/root1/zephyrproject/modules/hal/intel)"
+osource "/home/root1/zephyrproject/modules/hal/intel/zephyr/Kconfig"
 config ZEPHYR_HAL_INTEL_MODULE
-   bool
-   default y
+	bool
+	default y
+endmenu
 config ZEPHYR_MICROCHIP_MODULE
    bool
    default y
@@ -103,9 +106,9 @@ config ZEPHYR_HAL_RPI_PICO_MODULE
 	bool
 	default y
 endmenu
-menu "silabs (/home/root1/zephyrproject/modules/hal/silabs)"
+menu "hal_silabs (/home/root1/zephyrproject/modules/hal/silabs)"
 osource "/home/root1/zephyrproject/modules/hal/silabs/zephyr/Kconfig"
-config ZEPHYR_SILABS_MODULE
+config ZEPHYR_HAL_SILABS_MODULE
 	bool
 	default y
 endmenu

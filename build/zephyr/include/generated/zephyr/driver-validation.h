@@ -22,6 +22,8 @@
 
 #define K_SYSCALL_DRIVER_BBRAM(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, bbram, BBRAM)
 
+#define K_SYSCALL_DRIVER_BT_HCI(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, bt_hci, BT_HCI)
+
 #define K_SYSCALL_DRIVER_CAN(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, can, CAN)
 
 #define K_SYSCALL_DRIVER_CELLULAR(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, cellular, CELLULAR)
@@ -93,6 +95,8 @@
 #define K_SYSCALL_DRIVER_MIPI_DBI(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, mipi_dbi, MIPI_DBI)
 
 #define K_SYSCALL_DRIVER_MIPI_DSI(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, mipi_dsi, MIPI_DSI)
+
+#define K_SYSCALL_DRIVER_MSPI(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, mspi, MSPI)
 
 #define K_SYSCALL_DRIVER_PECI(ptr, op) K_SYSCALL_DRIVER_GEN(ptr, op, peci, PECI)
 

@@ -89,6 +89,29 @@ static inline int device_init(const struct device * dev)
 #endif
 
 
+extern const struct device * z_impl_device_get_by_dt_nodelabel(const char * nodelabel);
+
+__pinned_func
+static inline const struct device * device_get_by_dt_nodelabel(const char * nodelabel)
+{
+#ifdef CONFIG_USERSPACE
+	if (z_syscall_trap()) {
+		union { uintptr_t x; const char * val; } parm0 = { .val = nodelabel };
+		return (const struct device *) arch_syscall_invoke1(parm0.x, K_SYSCALL_DEVICE_GET_BY_DT_NODELABEL);
+	}
+#endif
+	compiler_barrier();
+	return z_impl_device_get_by_dt_nodelabel(nodelabel);
+}
+
+#if defined(CONFIG_TRACING_SYSCALL)
+#ifndef DISABLE_SYSCALL_TRACING
+
+#define device_get_by_dt_nodelabel(nodelabel) ({ 	const struct device * syscall__retval; 	sys_port_trace_syscall_enter(K_SYSCALL_DEVICE_GET_BY_DT_NODELABEL, device_get_by_dt_nodelabel, nodelabel); 	syscall__retval = device_get_by_dt_nodelabel(nodelabel); 	sys_port_trace_syscall_exit(K_SYSCALL_DEVICE_GET_BY_DT_NODELABEL, device_get_by_dt_nodelabel, nodelabel, syscall__retval); 	syscall__retval; })
+#endif
+#endif
+
+
 #ifdef __cplusplus
 }
 #endif

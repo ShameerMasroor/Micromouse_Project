@@ -14,9 +14,9 @@
 		zephyr,canbus = &can1;
 	};
 	aliases {
-		led0 = &orange_led_5;
+		led0 = &green_led_6;
 		led1 = &green_led_7;
-		led2 = &led_ext;
+		led2 = &red_led_10;
 		sw0 = &user_button;
 		magn0 = &lsm303dlhc_magn;
 		watchdog0 = &iwdg;
@@ -106,7 +106,7 @@
 				#gpio-cells = < 0x2 >;
 				reg = < 0x48000000 0x400 >;
 				clocks = < &rcc 0x14 0x20000 >;
-				phandle = < 0x25 >;
+				phandle = < 0x24 >;
 			};
 			gpiob: gpio@48000400 {
 				compatible = "st,stm32-gpio";
@@ -121,7 +121,6 @@
 				#gpio-cells = < 0x2 >;
 				reg = < 0x48000800 0x400 >;
 				clocks = < &rcc 0x14 0x80000 >;
-				phandle = < 0x24 >;
 			};
 			gpiod: gpio@48000c00 {
 				compatible = "st,stm32-gpio";
@@ -807,16 +806,12 @@
 			gpios = < &gpioe 0xd 0x0 >;
 			label = "User LD10";
 		};
-		led_ext: led_ext {
-			gpios = < &gpioc 0x0 0x0 >;
-			label = "User LDext";
-		};
 	};
 	gpio_keys {
 		compatible = "gpio-keys";
 		user_button: button {
 			label = "User";
-			gpios = < &gpioa 0x0 0x1 >;
+			gpios = < &gpioa 0x0 0x0 >;
 			zephyr,code = < 0xb >;
 		};
 	};

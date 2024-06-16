@@ -179,7 +179,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/silabs/cmake_install.cmake")
+  include("/home/root1/zephyrproject/micromouse_project/Micromouse_Project/build/modules/hal_silabs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)

@@ -33,14 +33,6 @@
     ],
     [
         [
-            "int __posix_clock_get_base",
-            "clockid_t clock_id, struct timespec *ts"
-        ],
-        "posix_clock.h",
-        true
-    ],
-    [
-        [
             "int z_sys_mutex_kernel_lock",
             "struct sys_mutex *mutex,\n\t\t\t\t      k_timeout_t timeout"
         ],
@@ -491,6 +483,14 @@
         [
             "int device_init",
             "const struct device *dev"
+        ],
+        "device.h",
+        true
+    ],
+    [
+        [
+            "const struct device *device_get_by_dt_nodelabel",
+            "const char *nodelabel"
         ],
         "device.h",
         true
@@ -2829,6 +2829,62 @@
             "const struct device *dev, uint8_t prtad,\n\t\t\t     uint8_t devad, uint16_t regad, uint16_t data"
         ],
         "mdio.h",
+        false
+    ],
+    [
+        [
+            "int mspi_config",
+            "const struct mspi_dt_spec *spec"
+        ],
+        "mspi.h",
+        false
+    ],
+    [
+        [
+            "int mspi_dev_config",
+            "const struct device *controller,\n\t\t\t      const struct mspi_dev_id *dev_id,\n\t\t\t      const enum mspi_dev_cfg_mask param_mask,\n\t\t\t      const struct mspi_dev_cfg *cfg"
+        ],
+        "mspi.h",
+        false
+    ],
+    [
+        [
+            "int mspi_get_channel_status",
+            "const struct device *controller, uint8_t ch"
+        ],
+        "mspi.h",
+        false
+    ],
+    [
+        [
+            "int mspi_transceive",
+            "const struct device *controller,\n\t\t\t      const struct mspi_dev_id *dev_id,\n\t\t\t      const struct mspi_xfer *req"
+        ],
+        "mspi.h",
+        false
+    ],
+    [
+        [
+            "int mspi_xip_config",
+            "const struct device *controller,\n\t\t\t      const struct mspi_dev_id *dev_id,\n\t\t\t      const struct mspi_xip_cfg *cfg"
+        ],
+        "mspi.h",
+        false
+    ],
+    [
+        [
+            "int mspi_scramble_config",
+            "const struct device *controller,\n\t\t\t\t   const struct mspi_dev_id *dev_id,\n\t\t\t\t   const struct mspi_scramble_cfg *cfg"
+        ],
+        "mspi.h",
+        false
+    ],
+    [
+        [
+            "int mspi_timing_config",
+            "const struct device *controller,\n\t\t\t\t const struct mspi_dev_id *dev_id,\n\t\t\t\t const uint32_t param_mask, void *cfg"
+        ],
+        "mspi.h",
         false
     ],
     [
