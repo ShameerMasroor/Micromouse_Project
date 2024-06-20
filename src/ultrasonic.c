@@ -1,6 +1,6 @@
-#include "ultrasonic.h"
+#include "../include/ultrasonic.h"
 
-void init_ultrasonic(struct ultrasonic *sensor) {
+void init_ultrasonic(const struct ultrasonic *sensor) {
     int ret;
 
     // Configure the trigger pin as an output
@@ -20,7 +20,7 @@ void init_ultrasonic(struct ultrasonic *sensor) {
     printk("Ultrasonic sensor initialized\n");
 }
 
-uint32_t measure_distance(struct ultrasonic *sensor) {
+uint32_t measure_distance(const struct ultrasonic *sensor) {
     // This function assumes a busy-wait implementation.
 
 
@@ -37,9 +37,11 @@ uint32_t measure_distance(struct ultrasonic *sensor) {
 
     
     while(echo_state == 0){
-        int echo_state = gpio_pin_get(sensor->echo_spec.port, sensor->echo_spec.pin);
-        // printk("Echo state is still 0 \n");
+        echo_state = gpio_pin_get(sensor->echo_spec.port, sensor->echo_spec.pin);
+        printk("Echo state is still 0 \n");
     }
+
+
     
     
     end = k_cycle_get_32();

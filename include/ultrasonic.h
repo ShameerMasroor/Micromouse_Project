@@ -6,7 +6,7 @@
 // Ensure that your sensor node is defined in the device tree
 
 
-struct ultrasonic {
+const struct ultrasonic {
     struct gpio_dt_spec trig_spec;
     struct gpio_dt_spec echo_spec;
 };
@@ -17,5 +17,5 @@ struct ultrasonic {
 //     .num = 0,
 // };
 
-void init_ultrasonic(struct ultrasonic *sensor);
-uint32_t measure_distance(struct ultrasonic *sensor);
+void init_ultrasonic(const struct ultrasonic *sensor);
+uint32_t measure_distance(const struct ultrasonic *sensor);

@@ -302,6 +302,7 @@ via threads. Good luck to us!
 #include <string.h>
 #include <zephyr/drivers/uart.h>
 #include <stdio.h>
+#include "../include/ultrasonic.h"
 
 /* size of stack area used by each thread */
 #define STACKSIZE 2048
@@ -312,6 +313,8 @@ via threads. Good luck to us!
 #define LED0_NODE DT_ALIAS(led0)
 #define BTN0_NODE DT_ALIAS(sw0)
 #define UART0_NODE DT_NODELABEL(usart1)  // as in our device tree
+#define ULTRASONIC_TRIG DT_ALIAS(ultrasonictrig)
+#define ULTRASONIC_ECHO DT_ALIAS(ultrasonicecho)
 
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
@@ -323,6 +326,14 @@ via threads. Good luck to us!
 
 #if !DT_NODE_HAS_STATUS(UART0_NODE, okay)
 #error "Unsupported board: uart0 devicetree alias is not defined"
+#endif
+
+#if !DT_NODE_HAS_STATUS(ULTRASONIC_TRIG, okay)
+#error "Unsupported board: trig devicetree alias is not defined"
+#endif
+
+#if !DT_NODE_HAS_STATUS(ULTRASONIC_ECHO, okay)
+#error "Unsupported board: echo devicetree alias is not defined"
 #endif
 
 struct led {
@@ -344,6 +355,12 @@ static const struct button btn0 = {
     .btn_spec = GPIO_DT_SPEC_GET_OR(BTN0_NODE, gpios, {0}),
     .btn_num = 0,
 };
+
+static const struct ultrasonic ultrasonic = {
+    .trig_spec = GPIO_DT_SPEC_GET_OR(ULTRASONIC_TRIG, gpios, {0}),
+    .echo_spec = GPIO_DT_SPEC_GET_OR(ULTRASONIC_ECHO, gpios, {0}),
+};
+
 
 static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
 
@@ -419,8 +436,11 @@ void init_uart(void)  //you do not need this. You made the thread work using sim
 	uart_callback_set(uart_dev, uart_cb, NULL);
 }
 
+void distance(void){
+    measure_distance(&ultrasonic);
 
+}
 
-
-K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
-K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(ultrasonic_id, STACKSIZE, distance, NULL, NULL, NULL, PRIORITY, 0, 0);
+// K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
+// K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
