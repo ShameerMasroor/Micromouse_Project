@@ -7,6 +7,7 @@
 
 
 const struct ultrasonic {
+    
     struct gpio_dt_spec trig_spec;
     struct gpio_dt_spec echo_spec;
 };

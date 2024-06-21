@@ -303,6 +303,8 @@ via threads. Good luck to us!
 #include <zephyr/drivers/uart.h>
 #include <stdio.h>
 #include "../include/ultrasonic.h"
+#include <zephyr/sys/mutex.h>
+#include "../include/shared_mutex.h"  // Include the shared header file
 
 /* size of stack area used by each thread */
 #define STACKSIZE 2048
@@ -315,6 +317,8 @@ via threads. Good luck to us!
 #define UART0_NODE DT_NODELABEL(usart1)  // as in our device tree
 #define ULTRASONIC_TRIG DT_ALIAS(ultrasonictrig)
 #define ULTRASONIC_ECHO DT_ALIAS(ultrasonicecho)
+
+K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
@@ -364,10 +368,12 @@ static const struct ultrasonic ultrasonic = {
 
 static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
 
-void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
-{
-	if (!device_is_ready(uart_dev)) {
+void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data) {
+    k_mutex_lock(&uart_mutex, K_FOREVER);
+
+    if (!device_is_ready(uart_dev)) {
         printk("UART device not found!");
+        k_mutex_unlock(&uart_mutex);
         return;
     }
 
@@ -382,6 +388,7 @@ void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
     int err = uart_configure(uart_dev, &uart_cfg);
     if (err) {
         printk("Failed to configure UART device!");
+        k_mutex_unlock(&uart_mutex);
         return;
     }
 
@@ -396,10 +403,11 @@ void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
     default:
         break;
     }
+
+    k_mutex_unlock(&uart_mutex);
 }
 
-void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uint32_t id)
-{
+void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uint32_t id) {
     const struct gpio_dt_spec *spec = &led->spec;
     const struct gpio_dt_spec *btn_spec = &btn->btn_spec;
 
@@ -412,6 +420,9 @@ void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uin
     while (1) {
         int input_state = gpio_pin_get(btn_spec->port, btn_spec->pin); // Read input pin state
 
+        // Lock the mutex before accessing UART
+        k_mutex_lock(&uart_mutex, K_FOREVER);
+
         // Check if input is high (assuming high means active)
         if (input_state) {
             gpio_pin_set(spec->port, spec->pin, 1); // Turn on LED
@@ -422,9 +433,11 @@ void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uin
             printf("Hello World!\n"); //contains formatting capabilities - highest overhead
             uart_poll_out(uart_dev, 'H');  // Send a character over UART, one character at a time - blocking in nature
         }
-        // k_msleep(100);
+
+        k_mutex_unlock(&uart_mutex);
     }
 }
+
 
 void blink0(void)     //for led0
 {
@@ -436,11 +449,31 @@ void init_uart(void)  //you do not need this. You made the thread work using sim
 	uart_callback_set(uart_dev, uart_cb, NULL);
 }
 
-void distance(void){
-    measure_distance(&ultrasonic);
+void distance(void) {
+    // while (1) {
+        // k_mutex_lock(&uart_mutex, K_FOREVER); // Lock the mutex before accessing UART
+        measure_distance(&ultrasonic);
+        // k_mutex_unlock(&uart_mutex); // Unlock the mutex after accessing UART
 
+        // k_sleep(K_SECONDS(1)); // Sleep for 1 second before measuring distance again
+    // }
 }
 
+int main(void){
+    
+    
+    // int k_mutex_init(&uart_mutex);
+
+
+
+    k_mutex_lock(&uart_mutex, K_FOREVER);
+    init_ultrasonic(&ultrasonic);
+
+    k_mutex_unlock(&uart_mutex);
+    return 0;
+}
+
+// K_THREAD_DEFINE(ultrasonic_id2, STACKSIZE, main, NULL, NULL, NULL, PRIORITY, 0, 0);
 K_THREAD_DEFINE(ultrasonic_id, STACKSIZE, distance, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
