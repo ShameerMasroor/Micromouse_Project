@@ -450,14 +450,17 @@ void init_uart(void)  //you do not need this. You made the thread work using sim
 }
 
 void distance(void) {
-    // while (1) {
-        // k_mutex_lock(&uart_mutex, K_FOREVER); // Lock the mutex before accessing UART
-        measure_distance(&ultrasonic);
-        // k_mutex_unlock(&uart_mutex); // Unlock the mutex after accessing UART
-
-        // k_sleep(K_SECONDS(1)); // Sleep for 1 second before measuring distance again
-    // }
+    while (1) {
+        uint32_t dist = measure_distance(&ultrasonic);
+        k_mutex_lock(&uart_mutex, K_FOREVER);
+        printk("Measured distance: %d cm\n", dist);
+        k_mutex_unlock(&uart_mutex);
+        k_sleep(K_SECONDS(0.1)); // Sleep for 1 second before measuring distance again
+    }
 }
+
+
+
 
 int main(void){
     

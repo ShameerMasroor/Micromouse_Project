@@ -29,42 +29,52 @@ void init_ultrasonic(const struct ultrasonic *sensor) {
 
 
 uint32_t measure_distance(const struct ultrasonic *sensor) {
-    // This function assumes a busy-wait implementation.
-
-    
-    uint32_t start, end;
-    bool echo_state=0;
+    uint32_t start, end, pulse_duration;
+    uint32_t cycles_per_sec = sys_clock_hw_cycles_per_sec();
+    bool echo_state = false;
+    int timeout = 1000000; // Timeout counter
 
     // Trigger the sensor by setting the trigger pin high for 10 microseconds
     gpio_pin_set(sensor->trig_spec.port, sensor->trig_spec.pin, 1);
-    k_busy_wait(10); //blocking use sleep
+    k_busy_wait(10); // 10 microseconds
     gpio_pin_set(sensor->trig_spec.port, sensor->trig_spec.pin, 0);
-// k_busy_wait(1000); 
+
     // Wait for the echo pin to go high
     start = k_cycle_get_32();
-
-    
-    while(echo_state == 0){
+    while (!echo_state && timeout-- > 0) {
         echo_state = gpio_pin_get(sensor->echo_spec.port, sensor->echo_spec.pin);
+    }
+    if (timeout <= 0) {
         k_mutex_lock(&uart_mutex, K_FOREVER);
-        printk("Echo state is: %d\n", echo_state);
+        printk("Timeout waiting for echo pin to go high\n");
         k_mutex_unlock(&uart_mutex);
+        return 0;
     }
 
-
-    
-    
+    // Wait for the echo pin to go low
+    timeout = 1000000;
+    while (echo_state && timeout-- > 0) {
+        echo_state = gpio_pin_get(sensor->echo_spec.port, sensor->echo_spec.pin);
+    }
     end = k_cycle_get_32();
-    k_mutex_lock(&uart_mutex, K_FOREVER);
-    printk("Echo state is now: %d\n", echo_state);
-    
+    if (timeout <= 0) {
+        k_mutex_lock(&uart_mutex, K_FOREVER);
+        printk("Timeout waiting for echo pin to go low\n");
+        k_mutex_unlock(&uart_mutex);
+        return 0;
+    }
+
     // Calculate the pulse duration in microseconds
-    uint32_t pulse_duration= k_cyc_to_us_floor32(end - start);
+    pulse_duration = (end - start) * 1e6 / cycles_per_sec;
 
     // Calculate the distance in centimeters
-    uint32_t distance_cm = 33129 * (pulse_duration/2000); 
+    uint32_t distance_cm = pulse_duration / 58;
 
+    // Print the pulse duration and distance measured
+    k_mutex_lock(&uart_mutex, K_FOREVER);
+    printk("Pulse duration: %d us\n", pulse_duration);
     printk("Distance measured: %d cm\n", distance_cm);
     k_mutex_unlock(&uart_mutex);
+
     return distance_cm;
 }
