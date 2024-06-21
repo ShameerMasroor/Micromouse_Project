@@ -44,9 +44,11 @@ uint32_t measure_distance(const struct ultrasonic *sensor) {
     while (!echo_state && timeout-- > 0) {
         echo_state = gpio_pin_get(sensor->echo_spec.port, sensor->echo_spec.pin);
     }
+
+    //the if condition will be entered when the while loop will be broken out of due to the timeout
     if (timeout <= 0) {
         k_mutex_lock(&uart_mutex, K_FOREVER);
-        printk("Timeout waiting for echo pin to go high\n");
+        printk("Timeout occured waiting for echo pin to go high. Ping failed.\n");
         k_mutex_unlock(&uart_mutex);
         return 0;
     }
@@ -68,7 +70,7 @@ uint32_t measure_distance(const struct ultrasonic *sensor) {
     pulse_duration = (end - start) * 1e6 / cycles_per_sec;
 
     // Calculate the distance in centimeters
-    uint32_t distance_cm = pulse_duration / 58;
+    uint32_t distance_cm = (pulse_duration / 58)-8;   //-12 due to the offset from the coils to the receiver plates
 
     // Print the pulse duration and distance measured
     k_mutex_lock(&uart_mutex, K_FOREVER);
