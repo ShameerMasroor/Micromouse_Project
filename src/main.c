@@ -303,6 +303,7 @@ via threads. Good luck to us!
 #include <zephyr/drivers/uart.h>
 #include <stdio.h>
 #include "../include/ultrasonic.h"
+#include "../include/IR.h"
 #include <zephyr/sys/mutex.h>
 #include "../include/shared_mutex.h"  // Include the shared header file
 
@@ -317,6 +318,8 @@ via threads. Good luck to us!
 #define UART0_NODE DT_NODELABEL(usart1)  // as in our device tree
 #define ULTRASONIC_TRIG DT_ALIAS(ultrasonictrig)
 #define ULTRASONIC_ECHO DT_ALIAS(ultrasonicecho)
+
+#define IR_OUT DT_ALIAS(dtout)
 
 K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 
@@ -338,6 +341,10 @@ K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 
 #if !DT_NODE_HAS_STATUS(ULTRASONIC_ECHO, okay)
 #error "Unsupported board: echo devicetree alias is not defined"
+#endif
+
+#if !DT_NODE_HAS_STATUS(IR_OUT, okay)
+#error "Unsupported board: IR devicetree alias is not defined"
 #endif
 
 struct led {
@@ -365,6 +372,9 @@ static const struct ultrasonic ultrasonic = {
     .echo_spec = GPIO_DT_SPEC_GET_OR(ULTRASONIC_ECHO, gpios, {0}),
 };
 
+static const struct ir ir = {
+    .d_out = GPIO_DT_SPEC_GET_OR(IR_OUT, gpios, {0}),
+};
 
 static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
 
@@ -459,7 +469,15 @@ void distance(void) {
     }
 }
 
-
+void wall_detect(void){
+    while (1){
+        bool dist = wall_detected(&ir);
+        k_mutex_lock(&uart_mutex, K_FOREVER);
+        printk("Wall Status: %d cm\n", dist);
+        k_mutex_unlock(&uart_mutex);
+        k_sleep(K_SECONDS(0.1));
+    }
+}
 
 
 int main(void){
@@ -473,10 +491,13 @@ int main(void){
     init_ultrasonic(&ultrasonic);
 
     k_mutex_unlock(&uart_mutex);
+
+    init_IR(&ir);
     return 0;
 }
 
 // K_THREAD_DEFINE(ultrasonic_id2, STACKSIZE, main, NULL, NULL, NULL, PRIORITY, 0, 0);
-K_THREAD_DEFINE(ultrasonic_id, STACKSIZE, distance, NULL, NULL, NULL, PRIORITY, 0, 0);
+// K_THREAD_DEFINE(ultrasonic_id, STACKSIZE, distance, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, NULL, NULL, NULL, PRIORITY, 0, 0);

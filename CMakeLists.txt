@@ -9,3 +9,4 @@ include_directories(${PROJECT_SOURCE_DIR}/../include)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/ultrasonic.c)
+target_sources(app PRIVATE src/IR.c)
