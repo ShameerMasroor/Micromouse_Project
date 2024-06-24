@@ -14,7 +14,12 @@ typedef struct {
     char right;
 } Direction;
 
-void wallFollower(Maze*, char* path);
+typedef struct{
+    bool left;
+    bool front;}
+Detection;
+
+void wallFollower(Maze*, char* path, Detection* detect);
 void optimizePath(char* path, char* optimized_path);
 
 #endif

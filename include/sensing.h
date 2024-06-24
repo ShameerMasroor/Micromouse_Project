@@ -3,18 +3,16 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "IR.h"
 
 typedef struct{
-    float Ultrasonic_left;
-    float Ultrasonic_front;
-    float IR_front;
-    float IR_left;
+    const struct ir *IR_Left;
+    const struct ir *IR_Front;
 } sensors_t;
 
-void initSensors(sensors_t sensor);
+void initSensors(sensors_t *sensor);
 void readSensors();
-bool isWallLeft();
-bool isWallFront();
-bool isWallRight();
+bool isWallLeft(sensors_t *sensor);
+bool isWallFront(sensors_t *sensor);
 
 #endif // SENSING_H

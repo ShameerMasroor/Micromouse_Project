@@ -9,10 +9,14 @@ K_THREAD_DEFINE(communication_thread_id, STACK_SIZE, communication_thread, NULL,
 K_THREAD_DEFINE(motor_thread_id, STACK_SIZE, motor_thread, NULL, NULL, NULL, PRIORITY, 0, 0);
 K_THREAD_DEFINE(algo_thread_id, STACK_SIZE, algo_thread, NULL, NULL, NULL, PRIORITY, 0, 0);
 
+K_MUTEX_DEFINE(uart_mutex);  //mutex definition
+
 static struct uart_t uart;
 static struct motor_t motor;
 static struct sensors_t sensors;
 
+
+static Detection detect;
 static Maze maze;
 static char path[100];
 static char  optimized_path[100];
@@ -30,11 +34,18 @@ void sensor_thread() {
     // initAccelerometer();
     
     while (1) {
-        readSensors();
+        //readSensors();
         // readGyroscope();
         // readAccelerometer();
+
+        detect.left = isWallLeft();
+        detect.front = isWallFront();
         // Process sensor data here
+        k_mutex_lock(&uart_mutex, K_FOREVER);
+        printk("Wall Status: %d cm\n  %d", dist, my_ir->num);
+        k_mutex_unlock(&uart_mutex);
         k_sleep(K_MSEC(1000));
+
     }
 }
 
@@ -57,7 +68,7 @@ void motor_thread() {
 }
 
 void algo_thread() {
-    wallFollower(&maze, path);
+    wallFollower(&maze, path, &detect);
     optimizePath(path, optimized_path);
     
     while (1) {

@@ -2,14 +2,9 @@
 #include "motor.h"
 #include "sensing.h"
 
-typedef struct {
-    char forward;
-    char right;
-    char back;
-    char left;
-} Direction;
-
 Direction direction = {'N', 'E', 'S', 'W'};
+
+Detection detect;
 
 void Rotate_Clockwise() {
     char temp = direction.right;
@@ -46,14 +41,14 @@ void moveForward(int* row, int* col) {
     stopMotors();
 }
 
-void wallFollower(Maze* m, char* path) {
+void wallFollower(Maze* m, char* path, Detection* detect) {
     int row = m->start_row;
     int col = m->start_col;
     int idx = 0;
 
     while (!(row == m->end_row && col == m->end_col)) {
-        bool left_wall = isWallLeft();
-        bool front_wall = isWallFront();
+        bool left_wall = detect->left;
+        bool front_wall = detect->front;
 
         if (!left_wall) {
             Rotate_CounterClockwise();
@@ -84,16 +79,3 @@ void optimizePath(char* path, char* optimized_path) {
     optimized_path[idx] = '\0';
 }
 
-int main() {
-    Maze maze = {10, 10, 0, 0, 9, 9}; // Example maze dimensions and start/end points
-    char path[100];
-    char optimized_path[100];
-
-    wallFollower(&maze, path);
-    optimizePath(path, optimized_path);
-
-    printf("Path: %s\n", path);
-    printf("Optimized Path: %s\n", optimized_path);
-
-    return 0;
-}

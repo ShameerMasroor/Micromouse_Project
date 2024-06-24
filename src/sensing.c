@@ -1,21 +1,21 @@
 #include "sensing.h"
 
-void initSensors(sensors_t sensor) {
-    // Initialize sensor hardware here
+void initSensors(sensors_t *sensor) 
+{
+    init_IR(sensor->IR_Left);
+    init_IR(sensor->IR_Front);
 }
 
 void readSensors() {
     // Dummy function to read sensor data
 }
 
-bool isWallLeft() {
-    // Dummy function to check for left wall
-    return false; // Return true if there's a wall on the left
+bool isWallLeft(sensors_t *sensor) {
+    return wall_detected(sensor->IR_Left); // Return true if there's a wall on the left
 }
 
-bool isWallFront() {
-    // Dummy function to check for front wall
-    return false; // Return true if there's a wall in front
+bool isWallFront(sensors_t *sensor) {
+    return wall_detected(sensor->IR_Front); // Return true if there's a wall on the front
 }
 
 bool isWallRight() {
