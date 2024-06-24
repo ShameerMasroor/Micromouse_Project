@@ -321,6 +321,8 @@ via threads. Good luck to us!
 
 #define IR_OUT DT_ALIAS(dtout)
 
+#define IR_OUT_2 DT_ALIAS(dtout2)
+
 K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
@@ -344,7 +346,11 @@ K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 #endif
 
 #if !DT_NODE_HAS_STATUS(IR_OUT, okay)
-#error "Unsupported board: IR devicetree alias is not defined"
+#error "Unsupported board: IR 1 devicetree alias is not defined"
+#endif
+
+#if !DT_NODE_HAS_STATUS(IR_OUT_2, okay)
+#error "Unsupported board: IR 2 devicetree alias is not defined"
 #endif
 
 struct led {
@@ -374,6 +380,12 @@ static const struct ultrasonic ultrasonic = {
 
 static const struct ir ir = {
     .d_out = GPIO_DT_SPEC_GET_OR(IR_OUT, gpios, {0}),
+    .num = 1,
+};
+
+static const struct ir ir2 = {
+    .d_out = GPIO_DT_SPEC_GET_OR(IR_OUT_2, gpios, {0}),
+    .num = 2,
 };
 
 static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
@@ -469,11 +481,11 @@ void distance(void) {
     }
 }
 
-void wall_detect(void){
+void wall_detect(const struct ir *my_ir){
     while (1){
-        bool dist = wall_detected(&ir);
+        bool dist = wall_detected(my_ir);
         k_mutex_lock(&uart_mutex, K_FOREVER);
-        printk("Wall Status: %d cm\n", dist);
+        printk("Wall Status: %d cm\n  %d", dist, my_ir->num);
         k_mutex_unlock(&uart_mutex);
         k_sleep(K_SECONDS(0.1));
     }
@@ -493,6 +505,7 @@ int main(void){
     k_mutex_unlock(&uart_mutex);
 
     init_IR(&ir);
+    init_IR(&ir2);
     return 0;
 }
 
@@ -500,4 +513,5 @@ int main(void){
 // K_THREAD_DEFINE(ultrasonic_id, STACKSIZE, distance, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
-K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, NULL, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, &ir, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(ir2_id, STACKSIZE, wall_detect, &ir2, NULL, NULL, PRIORITY, 0, 0);

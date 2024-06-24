@@ -8,6 +8,7 @@
 const struct ir{
    
    struct gpio_dt_spec d_out;
+   int num;
    
 };
 
