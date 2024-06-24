@@ -88,10 +88,16 @@
 			gpios = <&gpioa 1 GPIO_ACTIVE_HIGH>;
 		};
 
+		irout2: volt2 {
+			label = "IR_out2";
+			gpios = <&gpiof 4 GPIO_ACTIVE_HIGH>;
+		};
+
 	};
 
 	aliases {
 		dtout = &irout;
+		dtout2 = &irout2;
 		ultrasonictrig = &trigger;
 		ultrasonicecho = &echo;
 		led0 = &green_led_7;
