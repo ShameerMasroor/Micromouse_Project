@@ -1,11 +1,11 @@
-#include "uart.h"
+#include "../include/uart.h"
 
 // void uart_send(uart_t *uart, const char *str, size_t len){}
 
 void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data) {
     k_mutex_lock(&uart_mutex, K_FOREVER);
 
-    if (!device_is_ready(uart_dev)) {
+    if (!device_is_ready(dev)) {
         printk("UART device not found!");
         k_mutex_unlock(&uart_mutex);
         return;
@@ -19,7 +19,7 @@ void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data) 
         .flow_ctrl = UART_CFG_FLOW_CTRL_NONE,
     };
 
-    int err = uart_configure(uart_dev, &uart_cfg);
+    int err = uart_configure(dev, &uart_cfg);
     if (err) {
         printk("Failed to configure UART device!");
         k_mutex_unlock(&uart_mutex);
@@ -43,5 +43,5 @@ void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data) 
 
 void initUart(uart_t *uart)
 {
-    uart_callback_set(uart_dev, uart_cb, NULL);
+    uart_callback_set(uart->uart_dev, uart_cb, NULL);
 }

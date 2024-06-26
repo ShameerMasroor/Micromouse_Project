@@ -6,8 +6,8 @@
 #include "IR.h"
 
 typedef struct{
-    const struct ir *IR_Left;
-    const struct ir *IR_Front;
+    ir *IR_Left;
+    ir *IR_Front;
 } sensors_t;
 
 void initSensors(sensors_t *sensor, struct gpio_dt_spec left_pin, struct gpio_dt_spec front_pin);

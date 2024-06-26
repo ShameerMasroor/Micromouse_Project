@@ -12,19 +12,23 @@ typedef struct {
     int start_col;
 } Maze;
 
-typedef struct {
+typedef struct { // output direction
     char forward;
     char left;
     char back;
     char right;
+    //why not a single
 } Direction;
 
-typedef struct{
+typedef struct{ //input sensor information
     bool left;
     bool front;}
 Detection;
 
 void wallFollower(Maze*, char* path, Detection* detect);
+
+// why is wall follower taking path? shouldn't it be out
 void optimizePath(char* path, char* optimized_path);
+//same question
 
 #endif

@@ -16,11 +16,11 @@ void readSensors() {
 }
 
 bool isWallLeft(sensors_t *sensor) {
-    return wall_detected(sensor->IR_Left); // Return true if there's a wall on the left
+    return read_IR(sensor->IR_Left); // Return true if there's a wall on the left
 }
 
 bool isWallFront(sensors_t *sensor) {
-    return wall_detected(sensor->IR_Front); // Return true if there's a wall on the front
+    return read_IR(sensor->IR_Front); // Return true if there's a wall on the front
 }
 
 bool isWallRight() {
