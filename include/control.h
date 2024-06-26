@@ -6,11 +6,11 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/__assert.h>
 #include <stdio.h>
-#include "../include/algo.h"
-#include "../include/sensing.h"
+#include "algo.h"
 #include "motor.h"
 #include "uart.h"
 #include "sensing.h"
+#include "shared_mutex.h" 
 
 //#include "gyro.h"
 //#include "accelerometer.h"

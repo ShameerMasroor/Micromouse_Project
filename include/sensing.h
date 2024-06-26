@@ -10,7 +10,7 @@ typedef struct{
     const struct ir *IR_Front;
 } sensors_t;
 
-void initSensors(sensors_t *sensor);
+void initSensors(sensors_t *sensor, struct gpio_dt_spec left_pin, struct gpio_dt_spec front_pin);
 void readSensors();
 bool isWallLeft(sensors_t *sensor);
 bool isWallFront(sensors_t *sensor);

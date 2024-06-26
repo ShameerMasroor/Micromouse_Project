@@ -328,9 +328,6 @@
 // #error "Unsupported board: btn0 devicetree alias is not defined"
 // #endif
 
-// #if !DT_NODE_HAS_STATUS(UART0_NODE, okay)
-// #error "Unsupported board: uart0 devicetree alias is not defined"
-// #endif
 
 // #if !DT_NODE_HAS_STATUS(ULTRASONIC_TRIG, okay)
 // #error "Unsupported board: trig devicetree alias is not defined"

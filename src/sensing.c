@@ -1,8 +1,13 @@
 #include "../include/sensing.h"
 
-void initSensors(sensors_t *sensor) 
+void initSensors(sensors_t *sensor, struct gpio_dt_spec left_pin, struct gpio_dt_spec front_pin) 
 {
+    // Initialize IR Left
+    sensor->IR_Left->d_out = left_pin;
     init_IR(sensor->IR_Left);
+
+    // Initialize IR Front
+    sensor->IR_Front->d_out = front_pin;
     init_IR(sensor->IR_Front);
 }
 

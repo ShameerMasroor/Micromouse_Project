@@ -9,11 +9,34 @@ K_THREAD_DEFINE(sensor_thread_id, STACK_SIZE, sensor_thread, NULL, NULL, NULL, P
 //K_THREAD_DEFINE(motor_thread_id, STACK_SIZE, motor_thread, NULL, NULL, NULL, PRIORITY, 0, 0);
 K_THREAD_DEFINE(algo_thread_id, STACK_SIZE, algo_thread, NULL, NULL, NULL, PRIORITY, 0, 0);
 
-K_MUTEX_DEFINE(uart_mutex);  //mutex definition
+// Define Device Tree Aliases (or any other way to get the pins)
+#define IR_OUT_NODE DT_ALIAS(IR_OUT)
+#define IR_OUT_2_NODE DT_ALIAS(IR_OUT_2)
 
-static uart_t uart;
+#if DT_NODE_HAS_STATUS(IR_OUT_NODE, okay) && DT_NODE_HAS_STATUS(IR_OUT_2_NODE, okay)
+
+static struct gpio_dt_spec left_pin = GPIO_DT_SPEC_GET_OR(IR_OUT_NODE, gpios, {0});
+static struct gpio_dt_spec front_pin = GPIO_DT_SPEC_GET_OR(IR_OUT_2_NODE, gpios, {0});
+
+#define UART0_NODE DT_NODELABEL(usart1)  // as in our device tree
+
+#if !DT_NODE_HAS_STATUS(UART0_NODE, okay)
+#error "Unsupported board: uart0 devicetree alias is not defined"
+#endif
+
+// Instantiate the sensors_t struct
+static sensors_t sensors = {
+    .IR_Left = &(const struct ir){ .d_out = {0}, .num = 1 },
+    .IR_Front = &(const struct ir){ .d_out = {0}, .num = 2 }
+};
+
+static uart_t uart
+{
+    .uart_dev = &DEVICE_DT_GET(UART0_NODE);
+}
+
 static motor_t motor;
-static sensors_t sensors;
+
 
 
 static Detection detect;
