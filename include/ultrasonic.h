@@ -6,7 +6,7 @@
 // Ensure that your sensor node is defined in the device tree
 
 
-const struct ultrasonic {
+struct ultrasonic {
     
     struct gpio_dt_spec trig_spec;
     struct gpio_dt_spec echo_spec;

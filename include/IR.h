@@ -5,7 +5,7 @@
 
 // Ensure that your sensor node is defined in the device tree
 
-const struct ir{
+struct ir{
    
    struct gpio_dt_spec d_out;
    int num;

@@ -306,6 +306,7 @@ via threads. Good luck to us!
 #include "../include/IR.h"
 #include <zephyr/sys/mutex.h>
 #include "../include/shared_mutex.h"  // Include the shared header file
+#include "../include/motor.h"
 
 /* size of stack area used by each thread */
 #define STACKSIZE 2048
@@ -323,8 +324,19 @@ via threads. Good luck to us!
 
 #define IR_OUT_2 DT_ALIAS(dtout2)
 
-K_MUTEX_DEFINE(uart_mutex);  //mutex definition
+#define IN1 DT_ALIAS(in1)
+#define IN2 DT_ALIAS(in2)
+#define IN3 DT_ALIAS(in3)
+#define IN4 DT_ALIAS(in4)
+// #define EnA DT_ALIAS()
+// #define EnB DT_ALIAS()
 
+// static const struct pwm_dt_spec pwm_led0 = PWM_DT_SPEC_GET(DT_ALIAS(pwm_led0));
+
+#define MIN_PERIOD PWM_SEC(1U) / 128U
+#define MAX_PERIOD PWM_SEC(1U)
+
+K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
 #endif
@@ -352,6 +364,30 @@ K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 #if !DT_NODE_HAS_STATUS(IR_OUT_2, okay)
 #error "Unsupported board: IR 2 devicetree alias is not defined"
 #endif
+
+#if !DT_NODE_HAS_STATUS(IN1, okay)
+#error "Unsupported board: IN1 devicetree alias is not defined"
+#endif
+
+
+#if !DT_NODE_HAS_STATUS(IN2, okay)
+#error "Unsupported board: IN2 devicetree alias is not defined"
+#endif
+
+#if !DT_NODE_HAS_STATUS(IN3, okay)
+#error "Unsupported board: IN1 devicetree alias is not defined"
+#endif
+
+#if !DT_NODE_HAS_STATUS(IN4, okay)
+#error "Unsupported board: IN4 devicetree alias is not defined"
+#endif
+
+
+
+
+
+
+
 
 struct led {
     struct gpio_dt_spec spec;
@@ -387,6 +423,18 @@ static const struct ir ir2 = {
     .d_out = GPIO_DT_SPEC_GET_OR(IR_OUT_2, gpios, {0}),
     .num = 2,
 };
+
+static const struct motors motor = {
+    .in1 = GPIO_DT_SPEC_GET_OR(IN1, gpios, {0}),
+    .in2 = GPIO_DT_SPEC_GET_OR(IN2, gpios, {0}),
+    .in3 = GPIO_DT_SPEC_GET_OR(IN3, gpios, {0}),
+    .in4 = GPIO_DT_SPEC_GET_OR(IN4, gpios, {0}),
+    .enA = PWM_DT_SPEC_GET(DT_ALIAS(pwm_m1)),
+    .enB = NULL
+    
+};
+
+
 
 static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);
 
@@ -492,6 +540,33 @@ void wall_detect(const struct ir *my_ir){
 }
 
 
+void motor_chalao(void){
+    set_Speed(255, 255, &motor);
+    setMotorDirection(&motor,'f');
+    k_sleep(K_SECONDS(3));
+
+    set_Speed(100, 255, &motor);
+    setMotorDirection(&motor,'f');
+    k_sleep(K_SECONDS(3));
+
+    set_Speed(60, 255, &motor);
+    setMotorDirection(&motor,'f');
+    k_sleep(K_SECONDS(3));
+    
+    // setMotorDirection(&motor,'b');
+    // k_sleep(K_SECONDS(3));
+    // setMotorDirection(&motor,'l');
+    // k_sleep(K_SECONDS(1));
+    // setMotorDirection(&motor,'r');
+    // k_sleep(K_SECONDS(1));
+
+
+
+
+}
+
+
+
 int main(void){
     
     
@@ -506,6 +581,14 @@ int main(void){
 
     init_IR(&ir);
     init_IR(&ir2);
+
+    init_motors(&motor);
+
+
+
+
+
+
     return 0;
 }
 
@@ -515,3 +598,4 @@ int main(void){
 // K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
 K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, &ir, NULL, NULL, PRIORITY, 0, 0);
 K_THREAD_DEFINE(ir2_id, STACKSIZE, wall_detect, &ir2, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(motors_id, STACKSIZE, motor_chalao, NULL, NULL, NULL, PRIORITY, 0, 0);
