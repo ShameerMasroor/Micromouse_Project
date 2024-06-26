@@ -1,6 +1,6 @@
 #include "motor.h"
 
-void initMotorControl(motor_t motor)
+void initMotorControl(motor_t* motor)
 {}
 
 // Function to set the direction of the motors

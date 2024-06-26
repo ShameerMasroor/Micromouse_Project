@@ -1,6 +1,6 @@
 #include "gyro.h"
 
-void initGyroscope(gyro_t gyro) {
+void initGyroscope(gyro_t* gyro) {
     // Initialize gyroscope hardware here
 }
 

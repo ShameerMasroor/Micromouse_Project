@@ -1,7 +1,6 @@
-#include "../include/IR.h"
-#include <stdio.h>
+#include "../include/IR.h"struct
 
-void init_IR(const struct ir *IR) {
+void init_IR(const ir *IR) {
    int rett;
 
    // Configure the voltage pin as an output
@@ -18,12 +17,12 @@ void init_IR(const struct ir *IR) {
 
 
 
-bool wall_detected(const struct ir *IR)
+bool wall_detected(const ir *IR)
 {
    bool wall = gpio_pin_get(IR-> d_out.port, IR->d_out.pin);
 
    if (wall)
-       printf( IR->dir, "Wall detected");
+       printf(IR->dir, "Wall detected");
    else
        printf(IR->dir,"Wall absent");
 

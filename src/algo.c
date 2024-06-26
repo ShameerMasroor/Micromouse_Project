@@ -1,6 +1,6 @@
-#include "algo.h"
-#include "motor.h"
-#include "sensing.h"
+#include "../include/algo.h"
+#include "../include/motor.h"
+#include "../include/sensing.h"
 
 Direction direction = {'N', 'E', 'S', 'W'};
 
@@ -13,7 +13,7 @@ void Rotate_Clockwise() {
     direction.left = direction.forward;
     direction.forward = temp;
     // Assume a function to rotate the robot 90 degrees clockwise
-    rotateClockwise();
+    //rotateClockwise();
 }
 
 void Rotate_CounterClockwise() {
@@ -23,7 +23,7 @@ void Rotate_CounterClockwise() {
     direction.back = direction.right;
     direction.right = temp;
     // Assume a function to rotate the robot 90 degrees counterclockwise
-    rotateCounterClockwise();
+    //rotateCounterClockwise();
 }
 
 void moveForward(int* row, int* col) {
@@ -36,9 +36,9 @@ void moveForward(int* row, int* col) {
     } else if (direction.forward == 'S') {
         (*row)++;
     }
-    setMotorDirection(FORWARD);
-    k_sleep(K_MSEC(500)); // Assume it takes 500 ms to move forward by one cell
-    stopMotors();
+    // setMotorDirection(FORWARD);
+    // k_sleep(K_MSEC(500)); // Assume it takes 500 ms to move forward by one cell
+    // stopMotors();
 }
 
 void wallFollower(Maze* m, char* path, Detection* detect) {

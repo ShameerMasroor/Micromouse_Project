@@ -1,9 +1,9 @@
 #ifndef UART_H
 #define UART_H
 
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/uart.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/uart.h>
 
 #define UART_DEVICE_NODE DT_CHOSEN(zephyr_console)
 
@@ -22,3 +22,4 @@ void initUart(uart_t *uart);
 void uart_send(uart_t *uart, const char *str, size_t len);
 
 #endif // UART_H
+static const struct device *uart_dev = DEVICE_DT_GET(UART0_NODE);

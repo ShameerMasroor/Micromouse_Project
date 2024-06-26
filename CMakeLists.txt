@@ -7,5 +7,7 @@ project(Micromouse_Project)
 # Add this line to include the header files in the 'include' directory
 include_directories(${PROJECT_SOURCE_DIR}/../include)
 
-target_sources(app PRIVATE src/main.c)
-target_sources(app PRIVATE src/ultrasonic.c)
+target_sources(app PRIVATE src/control.c)
+target_sources(app PRIVATE src/sensing.c)
+target_sources(app PRIVATE src/IR.c)
+target_sources(app PRIVATE src/algo.c)

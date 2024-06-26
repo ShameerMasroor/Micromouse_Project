@@ -1,6 +1,6 @@
 #include "accelerometer.h"
 
-void initAccelerometer(accel_t accel) {
+void initAccelerometer(accel_t* accel) {
     // Initialize accelerometer hardware here
 }
 

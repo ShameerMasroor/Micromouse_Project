@@ -1,4 +1,4 @@
-#include "control.h"
+#include "../include/control.h"
 
 #define STACK_SIZE 2048
 #define PRIORITY 7
@@ -11,9 +11,9 @@ K_THREAD_DEFINE(algo_thread_id, STACK_SIZE, algo_thread, NULL, NULL, NULL, PRIOR
 
 K_MUTEX_DEFINE(uart_mutex);  //mutex definition
 
-static struct uart_t uart;
-static struct motor_t motor;
-static struct sensors_t sensors;
+static uart_t uart;
+static motor_t motor;
+static sensors_t sensors;
 
 
 static Detection detect;
@@ -35,8 +35,8 @@ void sensor_thread() {
         //readSensors();
         // readGyroscope();
         // readAccelerometer();
-        detect.left = isWallLeft();
-        detect.front = isWallFront();
+        detect.left = isWallLeft(&sensors);
+        detect.front = isWallFront(&sensors);
         // Process sensor data here
         // k_mutex_lock(&uart_mutex, K_FOREVER);
         // printk("Wall Status: %d cm\n  %d", dist, sensors.IR_Front);

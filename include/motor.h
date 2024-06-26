@@ -12,7 +12,7 @@ typedef struct{
 } motor_t;
 
 // Function to initialize the motor control
-void initMotorControl(motor_t motor);
+void initMotorControl(motor_t* motor);
 
 // Function to set the direction of the motors
 void setMotorDirection();
