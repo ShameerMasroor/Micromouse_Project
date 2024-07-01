@@ -10,10 +10,10 @@
 
 struct motors {
     
-    struct gpio_dt_spec in1;
-    struct gpio_dt_spec in2;
-    struct gpio_dt_spec in3;
-    struct gpio_dt_spec in4;
+    const struct gpio_dt_spec in1;
+    const struct gpio_dt_spec in2;
+    const struct gpio_dt_spec in3;
+    const struct gpio_dt_spec in4;
     const struct  pwm_dt_spec enA;
     const struct  pwm_dt_spec enB;
 
@@ -25,7 +25,7 @@ struct motors {
 //     .num = 0,
 // };
 
-void init_motors(const struct motors *motors);
-void setMotorDirection(const struct motors *motors,char direction);
+void init_motors(void);
+void setMotorDirection(char direction);
 void set_Speed(double m1_speed, double m2_speed, const struct motors *motors);
 
