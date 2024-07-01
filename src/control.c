@@ -39,7 +39,7 @@ static uart_t uart = {
     .uart_dev = DEVICE_DT_GET(UART0_NODE)
 };
 
-static motor_t motor;
+//static motor_t motor;
 
 static Detection detect;
 static Maze maze;
@@ -80,14 +80,14 @@ void communication_thread() {
     }
 }
 
-void motor_thread() {
-    initMotorControl(&motor);
+// void motor_thread() {
+//     initMotorControl(&motor);
     
-    while (1) {
-        // Add motor control logic here
-        k_sleep(K_MSEC(1000));
-    }
-}
+//     while (1) {
+//         // Add motor control logic here
+//         k_sleep(K_MSEC(1000));
+//     }
+// }
 
 void algo_thread() {
     wallFollower(&maze, path, &detect);
@@ -99,10 +99,10 @@ void algo_thread() {
     // }
 }
 
-int main() {
+int main(void) {
     initUart(&uart);
     printk("Micromouse Robot Starting...\n");
- 
+    init_motors();
     // // Start threads
     // k_thread_start(communication_thread_id);
     // k_thread_start(control_thread_id);
