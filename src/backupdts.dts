@@ -139,6 +139,7 @@
 		volt-sensor0 = &vref;
 		volt-sensor1 = &vbat;
 		pwm-m1 = &pwm_m1;
+
 		in1 =&motor_right_in1;
 		in2 =&motor_right_in2;
 		in3 =&motor_left_in3;
@@ -153,6 +154,10 @@
 		pwm_m1: pwm_m1 {
 			pwms = <&pwm1 1 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
 		};
+
+		
+
+
 	};
 
 		
@@ -291,10 +296,13 @@ zephyr_udc0: &usb {
 	status = "okay";
 	pwm1: pwm {
 		status = "okay";
-		pinctrl-0 = <&tim1_ch2_pe11>;
+		pinctrl-0 = <&tim1_ch1_pe9>;
 		pinctrl-names = "default";
 	};
+
 };
+
+
 
 &adc1 {
 	pinctrl-0 = <&adc1_in1_pa0>;

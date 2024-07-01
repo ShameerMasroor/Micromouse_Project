@@ -1,6 +1,8 @@
 #include "../include/motor.h"
 #include "../include/shared_mutex.h"  // Include the shared header file
-#include <zephyr/drivers/pwm.h>
+// #include <zephyr/drivers/pwm.h>
+
+
 
 void init_motors(const struct motors *motors){
 
@@ -21,7 +23,7 @@ int ret;
     if (ret < 0) {
         k_mutex_lock(&uart_mutex, K_FOREVER);
         printk("Error %d: failed to configure in2 pin\n", ret);
-        
+        k_mutex_unlock(&uart_mutex);
         return;
     }
 
@@ -29,7 +31,7 @@ int ret;
     if (ret < 0) {
         k_mutex_lock(&uart_mutex, K_FOREVER);
         printk("Error %d: failed to configure in3 pin\n", ret);
-        
+        k_mutex_unlock(&uart_mutex);
         return;
     }
 
@@ -37,10 +39,21 @@ int ret;
     if (ret < 0) {
         k_mutex_lock(&uart_mutex, K_FOREVER);
         printk("Error %d: failed to configure in4 pin\n", ret);
-        
+        k_mutex_unlock(&uart_mutex);
         return;
     }
 
+	if (!pwm_is_ready_dt(&motors->enA)) {
+		printk("Error: PWM device enA is not ready\n");
+		return;
+	}
+
+	if (!pwm_is_ready_dt(&motors->enB)) {
+		printk("Error: PWM device enB is not ready\n");
+		return;
+	}
+
+    k_mutex_lock(&uart_mutex, K_FOREVER);
     printk("Both motors initialized\n");
     k_mutex_unlock(&uart_mutex);
 
@@ -53,6 +66,7 @@ void setMotorDirection(const struct motors *motors,char direction){
         case 'f':  //forwards
             gpio_pin_set(motors->in1.port, motors->in1.pin, 1);
             gpio_pin_set(motors->in2.port, motors->in2.pin, 0);
+
             gpio_pin_set(motors->in3.port, motors->in3.pin, 1);
             gpio_pin_set(motors->in4.port, motors->in4.pin, 0);
             break;
@@ -94,10 +108,17 @@ void setMotorDirection(const struct motors *motors,char direction){
 }
 
 
-void set_Speed(uint32_t m1_speed, uint32_t m2_speed, const struct motors *motors){
 
-
-    pwm_set_dt(&(motors->enA), 255, m1_speed);  //giving this a duty cycle
+void set_Speed(double m1_speed, double m2_speed, const struct motors *motors){
+    // uint32_t NUM_STEPS = 50;
+    // uint32_t step = motors.period / NUM_STEPS;
+    // pwm_set_pulse_dt(&(motors->enA), (motors.period/NUM_STEPS)*(m1_speed));  //giving this a duty cycle
+    pwm_set_pulse_dt(&(motors->enA),m1_speed); 
+    pwm_set_pulse_dt(&(motors->enB),m2_speed);
+    k_mutex_lock(&uart_mutex, K_FOREVER);
+    printk("Motor Speeds Set %f  %f \n", m1_speed, m2_speed);
+    k_mutex_unlock(&uart_mutex);
+    //period= 0.0001 sec
     // pwm_set_dt(motors->enB, 255, m2_speed);
 
     //

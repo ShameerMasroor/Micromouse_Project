@@ -3,6 +3,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/pwm.h>
+// #include "../include/shared_mutex.h"  
 
 // Ensure that your sensor node is defined in the device tree
 
@@ -26,5 +27,5 @@ struct motors {
 
 void init_motors(const struct motors *motors);
 void setMotorDirection(const struct motors *motors,char direction);
-void set_Speed(uint32_t m1_speed, uint32_t m2_speed, const struct motors *motors);
+void set_Speed(double m1_speed, double m2_speed, const struct motors *motors);
 

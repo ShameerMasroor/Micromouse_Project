@@ -337,6 +337,7 @@ via threads. Good luck to us!
 #define MAX_PERIOD PWM_SEC(1U)
 
 K_MUTEX_DEFINE(uart_mutex);  //mutex definition
+
 #if !DT_NODE_HAS_STATUS(LED0_NODE, okay)
 #error "Unsupported board: led0 devicetree alias is not defined"
 #endif
@@ -424,14 +425,16 @@ static const struct ir ir2 = {
     .num = 2,
 };
 
+//static const struct pwm_dt_spec pwm_motor1 = PWM_DT_SPEC_GET(DT_ALIAS(pwm_m1));
 static const struct motors motor = {
     .in1 = GPIO_DT_SPEC_GET_OR(IN1, gpios, {0}),
     .in2 = GPIO_DT_SPEC_GET_OR(IN2, gpios, {0}),
     .in3 = GPIO_DT_SPEC_GET_OR(IN3, gpios, {0}),
     .in4 = GPIO_DT_SPEC_GET_OR(IN4, gpios, {0}),
     .enA = PWM_DT_SPEC_GET(DT_ALIAS(pwm_m1)),
-    .enB = NULL
     
+    // .enA = pwm_motor1,
+    .enB= PWM_DT_SPEC_GET(DT_ALIAS(pwm_m2)),
 };
 
 
@@ -489,7 +492,6 @@ void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uin
 
     while (1) {
         int input_state = gpio_pin_get(btn_spec->port, btn_spec->pin); // Read input pin state
-
         // Lock the mutex before accessing UART
         k_mutex_lock(&uart_mutex, K_FOREVER);
 
@@ -541,18 +543,27 @@ void wall_detect(const struct ir *my_ir){
 
 
 void motor_chalao(void){
-    set_Speed(255, 255, &motor);
-    setMotorDirection(&motor,'f');
-    k_sleep(K_SECONDS(3));
 
-    set_Speed(100, 255, &motor);
-    setMotorDirection(&motor,'f');
-    k_sleep(K_SECONDS(3));
+    int percent_to_period_A = 0;
+    int percent_to_period_B = 0;
+    percent_to_period_A = 0.5*motor.enA.period;
+    percent_to_period_B =  0.5*motor.enB.period;
+    set_Speed(percent_to_period_A, percent_to_period_B, &motor);
 
-    set_Speed(60, 255, &motor);
     setMotorDirection(&motor,'f');
-    k_sleep(K_SECONDS(3));
     
+    k_sleep(K_SECONDS(3));
+
+    //set_Speed(0.1, 0.1, &motor);
+    // setMotorDirection(&motor,'f');
+    // // set_Speed(50000, 50000, &motor);
+    // setMotorDirection(&motor,'f');
+    //k_sleep(K_SECONDS(3));
+
+    // // set_Speed(50000, 50000, &motor);
+    // setMotorDirection(&motor,'f');
+    // k_sleep(K_SECONDS(1));
+
     // setMotorDirection(&motor,'b');
     // k_sleep(K_SECONDS(3));
     // setMotorDirection(&motor,'l');
@@ -569,19 +580,36 @@ void motor_chalao(void){
 
 int main(void){
     
+    init_motors(&motor);
+    while(1){
+        printk("Running loop\n");
+        k_msleep(250);   
+    }
+    return 0;
+	if (!pwm_is_ready_dt(&motor.enA)) {
+		printk("Error: PWM device pwm is not ready\n");
+		return 0;
+	}
+    int ret;
     
-    // int k_mutex_init(&uart_mutex);
-
-
+    printk("Using pulse width %d%%\n", motor.enA.period);
+    while(1){
+        printk("Running loop\n");
+        ret = pwm_set_pulse_dt(&motor.enA, (int)(0.75*motor.enA.period));
+        if (ret) {
+            printk("Error %d: failed to set pulse width\n", ret);
+        }
+        k_msleep(250);   
+    }
 
     k_mutex_lock(&uart_mutex, K_FOREVER);
     init_ultrasonic(&ultrasonic);
 
     k_mutex_unlock(&uart_mutex);
 
+
     init_IR(&ir);
     init_IR(&ir2);
-
     init_motors(&motor);
 
 
@@ -596,6 +624,6 @@ int main(void){
 // K_THREAD_DEFINE(ultrasonic_id, STACKSIZE, distance, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(uart_id, STACKSIZE, init_uart, NULL, NULL, NULL, PRIORITY, 0, 0);
 // K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
-K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, &ir, NULL, NULL, PRIORITY, 0, 0);
-K_THREAD_DEFINE(ir2_id, STACKSIZE, wall_detect, &ir2, NULL, NULL, PRIORITY, 0, 0);
+//K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, &ir, NULL, NULL, PRIORITY, 0, 0);
+//K_THREAD_DEFINE(ir2_id, STACKSIZE, wall_detect, &ir2, NULL, NULL, PRIORITY, 0, 0);
 K_THREAD_DEFINE(motors_id, STACKSIZE, motor_chalao, NULL, NULL, NULL, PRIORITY, 0, 0);
