@@ -1,10 +1,11 @@
 #include "../include/algo.h"
 #include "../include/motor.h"
 #include "../include/sensing.h"
+#include "../include/sensing_control_q.h"
 
 Direction direction = {'N', 'E', 'S', 'W'};
 
-Detection detect;
+
 
 void Rotate_Clockwise() {
     char temp = direction.right;
@@ -14,6 +15,8 @@ void Rotate_Clockwise() {
     direction.forward = temp;
     // Assume a function to rotate the robot 90 degrees clockwise
     //rotateClockwise();
+
+    printk("go right\n");
 }
 
 void Rotate_CounterClockwise() {
@@ -24,6 +27,7 @@ void Rotate_CounterClockwise() {
     direction.right = temp;
     // Assume a function to rotate the robot 90 degrees counterclockwise
     //rotateCounterClockwise();
+    printk("go left\n");
 }
 
 void moveForward(int* row, int* col) {
@@ -39,17 +43,18 @@ void moveForward(int* row, int* col) {
     // setMotorDirection(FORWARD);
     // k_sleep(K_MSEC(500)); // Assume it takes 500 ms to move forward by one cell
     // stopMotors();
+    printk("go forward\n");
 }
 
-void wallFollower(Maze* m, char* path, Detection* detect) {
+void wallFollower(Maze* m, char* path, sensor_data_t *sensor_data) {
     int row = m->start_row;
     int col = m->start_col;
     int idx = 0;
 
-    while (!(row == m->end_row && col == m->end_col)) {
-        bool left_wall = detect->left;
-        bool front_wall = detect->front;
-
+    if (!(row == m->end_row && col == m->end_col)) {
+        // while () {
+        bool left_wall = sensor_data->ir_data.left_ir_data;
+        bool front_wall = sensor_data->ir_data.front_ir_data;
         if (!left_wall) {
             Rotate_CounterClockwise();
             moveForward(&row, &col);

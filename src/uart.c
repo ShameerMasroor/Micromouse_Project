@@ -2,7 +2,20 @@
 
 // void uart_send(uart_t *uart, const char *str, size_t len){}
 
+#define UART0_NODE DT_NODELABEL(usart1)  // as in our device tree
+#if !DT_NODE_HAS_STATUS(UART0_NODE, okay)
+#error "Unsupported board: uart0 devicetree alias is not defined"
+#endif
+
+
+static uart_t uart = {
+    .uart_dev = DEVICE_DT_GET(UART0_NODE)
+};
+
+
+
 void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data) {
+    dev = &uart.uart_dev;
     k_mutex_lock(&uart_mutex, K_FOREVER);
 
     if (!device_is_ready(dev)) {

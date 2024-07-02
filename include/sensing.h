@@ -5,14 +5,22 @@
 #include <stdbool.h>
 #include "IR.h"
 
+#define STACK_SIZE 2048
+#define PRIORITY 7
+
 typedef struct{
     ir *IR_Left;
     ir *IR_Front;
+    
 } sensors_t;
 
-void initSensors(sensors_t *sensor, struct gpio_dt_spec left_pin, struct gpio_dt_spec front_pin);
+typedef struct{
+    ir_data_t ir_data;
+    //you may define an ultrasonic struct
+} sensor_data_t;
+
+void initSensors(void);
 void readSensors();
-bool isWallLeft(sensors_t *sensor);
-bool isWallFront(sensors_t *sensor);
+void sensor_thread();
 
 #endif // SENSING_H

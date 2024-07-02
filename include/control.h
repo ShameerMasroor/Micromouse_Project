@@ -11,14 +11,11 @@
 #include "uart.h"
 #include "sensing.h"
 #include "shared_mutex.h" 
+#include "sensing_control_q.h"
+#include <stdbool.h>
 
 //#include "gyro.h"
 //#include "accelerometer.h"
-
-void control_thread();
-void sensor_thread();
-void communication_thread();
-void motor_thread();
-void algo_thread();
+void control_thread(void);
 
 #endif // CONTROL_H

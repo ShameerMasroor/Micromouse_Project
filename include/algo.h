@@ -1,11 +1,13 @@
 #ifndef ALGO_H
 #define ALGO_H
+
+#include "sensing.h"
 #include <stdbool.h>
 
 typedef struct {
     int rows;
     int cols;
-    int maze_map[20][30][4];  // Assuming max maze size, 4 for direction walls
+    // int maze_map[20][30][4];  // Assuming max maze size, 4 for direction walls
     int end_row;
     int end_col;
     int start_row;
@@ -20,12 +22,9 @@ typedef struct { // output direction
     //why not a single
 } Direction;
 
-typedef struct{ //input sensor information
-    bool left;
-    bool front;}
-Detection;
 
-void wallFollower(Maze*, char* path, Detection* detect);
+
+void wallFollower(Maze*, char* path, sensor_data_t *sensor_data);
 
 // why is wall follower taking path? shouldn't it be out
 void optimizePath(char* path, char* optimized_path);
