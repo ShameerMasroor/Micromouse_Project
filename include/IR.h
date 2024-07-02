@@ -20,3 +20,4 @@ struct ir{
 
 void init_IR(const struct ir *sensor);
 bool wall_detected(const struct ir *sensor);
+// bool wall_detected(void);

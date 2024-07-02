@@ -29,11 +29,11 @@ bool wall_detected(const struct ir *sensor){
    wall = gpio_pin_get(sensor-> d_out.port, sensor->d_out.pin);
 
    if (wall){ 
-       printf("Wall detected");
+       printf("Wall detected \n");
    }
 
    else {
-       printf("Wall absent");
+       printf("Wall absent \n");
    }
 
    return wall;

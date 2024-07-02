@@ -91,13 +91,15 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
+            printk("Going Forwards.\n");
             break;
 
         case 'b':  //backwards
             gpio_pin_set_dt(&in1, 0);
             gpio_pin_set_dt(&in2, 1);
-            gpio_pin_set_dt(&in3, 1);
+            gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
+            printk("Going backwards.\n");
             break;
 
         case 'r':  //right
@@ -105,6 +107,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
+            printk("Turning Right.\n");
             break;
 
         case 'l':  //left
@@ -112,6 +115,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 1);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
+            printk("Turning left.\n");
             break;
 
         case 'h':  //halt
@@ -119,6 +123,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 0);
+            printk("Motors halted.\n");
             break;
 
         default: //you may add break here in default in case the system doesnt perform correctly
@@ -126,6 +131,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 0);
+            printk("Default case entered.\n");
 
     }
 }
@@ -159,7 +165,13 @@ void motor_chalao(void){
     printk("Motor direction setting\n");
     setMotorDirection('f');
     // gpio_pin_set_dt(&in1, 0);
-    //gpio_pin_set_dt(&in2, 1);
+    // gpio_pin_set_dt(&in2, 1);
+    // gpio_pin_set_dt(&in3, 0);
+    // gpio_pin_set_dt(&in4, 1);
+    k_sleep(K_SECONDS(3));
+    percent_to_period_A = 1*motor.enA.period;
+    percent_to_period_B =  1*motor.enB.period;
+    set_Speed(percent_to_period_A, percent_to_period_B, &motor);
     k_sleep(K_SECONDS(3));
 }
 

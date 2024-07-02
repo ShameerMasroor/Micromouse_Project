@@ -521,35 +521,103 @@ void distance(void) {
     }
 }
 
-void wall_detect(const struct ir *my_ir){
-    while (1){
-        bool dist = wall_detected(my_ir);
-        k_mutex_lock(&uart_mutex, K_FOREVER);
-        printk("Wall Status: %d cm\n  %d", dist, my_ir->num);
-        k_mutex_unlock(&uart_mutex);
-        k_sleep(K_SECONDS(0.1));
+// void wall_detect(const struct ir *my_ir){
+//     // while (1){
+//         bool dist = wall_detected(my_ir);
+//         k_mutex_lock(&uart_mutex, K_FOREVER);
+//         printk("Wall Status: %d cm\n  %d", dist, my_ir->num);
+//         k_mutex_unlock(&uart_mutex);
+//         // k_sleep(K_SECONDS(0.1));
+//     // }
+// }
+
+// the following code is only for practise of timers. You may remove it
+// void my_work_handler(struct k_work *work) {
+//     wall_detect(&ir);
+//     wall_detect(&ir2);
+//     printk("Work handler called\n");
+//     // Add your custom processing here
+// }
+
+// K_WORK_DEFINE(my_work, my_work_handler);
+
+// void my_timer_handler(struct k_timer *dummy) {
+//     k_work_submit(&my_work);
+// }
+
+// K_TIMER_DEFINE(my_timer, my_timer_handler, NULL);
+
+//the timer code ends here
+
+
+//trying the following for message queues
+
+//lets take IR thread and light up an LED with it
+
+K_MSGQ_DEFINE(my_msgq, sizeof(bool), 10, 1);
+
+void wall_detect(void)
+{
+    bool wall;
+
+    
+
+    while (1) {
+        /* create data item to send (e.g. measurement, timestamp, ...) */
+        wall = wall_detected(&ir);
+
+        /* send data to consumers */
+        while (k_msgq_put(&my_msgq, &wall, K_NO_WAIT) != 0) {
+            /* message queue is full: purge old data & try again */
+            k_msgq_purge(&my_msgq);
+            printk("into message q \n");
+            k_sleep(K_MSEC(2000));
+        }
+
+        /* data item was successfully added to message queue */
+    }
+}
+
+
+void consumer_thread_LED(void)
+{
+    bool wall;
+
+    printk("at consumer \n");
+
+    while (1) {
+        /* get a data item */
+        k_msgq_get(&my_msgq, &wall, K_FOREVER);
+
+        if (wall){
+            printk("wall is detected_message queue \n");
+        
+        }
+
+        else{
+            printk("thenga \n");
+        }
+        
     }
 }
 
 
 
-
-
 int main(void){
-    
-    k_mutex_lock(&uart_mutex, K_FOREVER);
-    init_ultrasonic(&ultrasonic);
+    // k_timer_start(&my_timer, K_SECONDS(0), K_SECONDS(0.1));
+    // k_mutex_lock(&uart_mutex, K_FOREVER);
+    // init_ultrasonic(&ultrasonic);
 
-    k_mutex_unlock(&uart_mutex);
-
-
-    init_IR(&ir);
-    init_IR(&ir2);
-    init_motors();
+    // k_mutex_unlock(&uart_mutex);
 
 
+    // init_IR(&ir);
+    // init_IR(&ir2);
+    // init_motors();
 
+    printk("Starting wall detection system\n");
 
+    // Create and start the producer and consumer threads
 
 
     return 0;
@@ -561,3 +629,7 @@ int main(void){
 // K_THREAD_DEFINE(blink0_id, STACKSIZE, blink0, NULL, NULL, NULL, PRIORITY, 0, 0);
 //K_THREAD_DEFINE(ir_id, STACKSIZE, wall_detect, &ir, NULL, NULL, PRIORITY, 0, 0);
 //K_THREAD_DEFINE(ir2_id, STACKSIZE, wall_detect, &ir2, NULL, NULL, PRIORITY, 0, 0);
+
+K_THREAD_DEFINE(ir_test, STACKSIZE, wall_detect, &ir, NULL, NULL, PRIORITY, 0, 0);
+K_THREAD_DEFINE(output_test, STACKSIZE, consumer_thread_LED, NULL, NULL, NULL, PRIORITY, 0, 0);
+    
