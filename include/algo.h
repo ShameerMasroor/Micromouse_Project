@@ -28,6 +28,7 @@ void wallFollower(Maze*, char* path, sensor_data_t *sensor_data);
 
 // why is wall follower taking path? shouldn't it be out
 void optimizePath(char* path, char* optimized_path);
+char right_hand_follower(sensor_data_t *received_data);
 //same question
 
 #endif

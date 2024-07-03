@@ -84,3 +84,25 @@ void optimizePath(char* path, char* optimized_path) {
     optimized_path[idx] = '\0';
 }
 
+
+char right_hand_follower(sensor_data_t *received_data){
+
+    bool ir_right_state = received_data->ir_data.left_ir_data;
+    bool ir_front_state = received_data->ir_data.front_ir_data;
+
+    if (ir_right_state && !ir_front_state){
+        printk("Go forward\n");
+        return 'f';
+    }
+    else if (ir_right_state && ir_front_state){
+        printk("Go left\n");
+        return 'l';
+    }
+    else if (!ir_right_state){
+        printk("Go right\n");
+        return 'r';
+    }
+
+
+
+}
