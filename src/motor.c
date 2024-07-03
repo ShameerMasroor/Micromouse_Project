@@ -4,9 +4,7 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/pwm.h>
 
-/* size of stack area used by each thread */
 #define STACKSIZE 2048
-/* scheduling priority used by each thread */
 #define PRIORITY 7
 
 K_MSGQ_DEFINE(motor_control_q, sizeof(char), 10, 1);
@@ -41,7 +39,7 @@ void init_motors(void)
         printk("Error %d: failed to configure in1 pin\n", ret);
         // k_mutex_unlock(&uart_mutex);
         return; 
-
+    }
     ret = gpio_pin_configure_dt(&in2, GPIO_OUTPUT);
     if (ret < 0) {
         // k_mutex_lock(&uart_mutex, K_FOREVER);
@@ -79,7 +77,6 @@ void init_motors(void)
     // k_mutex_lock(&uart_mutex, K_FOREVER);
     printk("Both motors initialized\n");
     // k_mutex_unlock(&uart_mutex);
-    }
 }
 
 void setMotorDirection(char direction)
@@ -98,7 +95,7 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in1, 0);
             gpio_pin_set_dt(&in2, 1);
             gpio_pin_set_dt(&in3, 1);
-            gpio_pin_set_dt(&in4, 1);
+            gpio_pin_set_dt(&in4, 0);
             printk("Going backwards\n");
             break;
 
@@ -144,21 +141,20 @@ void set_Speed(float m1_speed, float m2_speed, const motors *motors)
 void motor_thread(void)
 {
     init_motors();
-
+    percent_to_period_A = 0.45*motor.enA.period;
+    percent_to_period_B = 0.5*motor.enB.period;
+    set_Speed(percent_to_period_A, percent_to_period_B, &motor);
     while (1)
     {
         k_msgq_get(&motor_control_q, &command, K_FOREVER); 
 
-        printk("Motor thread running\n");
-        percent_to_period_A = 0.5*motor.enA.period;
-        percent_to_period_B = 0.5*motor.enB.period;
-        set_Speed(percent_to_period_A, percent_to_period_B, &motor);
+        // printk("Motor thread running\n");
 
-        printk("Motor direction setting\n");
+        // printk("Motor direction setting\n");
         setMotorDirection(command);
     }
 
-    k_sleep(K_SECONDS(3));
+    k_sleep(K_MSEC(1));
 }
 
 K_THREAD_DEFINE(motors_id, STACKSIZE, motor_thread, NULL, NULL, NULL, PRIORITY, 0, 0);

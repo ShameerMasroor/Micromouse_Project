@@ -9,6 +9,7 @@
 #define PRIORITY 7
 
 extern struct k_msgq sensing_control_q;
+extern struct k_timer read_sensor_timer;
 
 typedef struct{
     ir *IR_Left;

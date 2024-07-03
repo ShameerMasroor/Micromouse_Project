@@ -16,14 +16,19 @@
 static sensor_data_t sensor_data = { .ir_data = NULL };
 static char command;
 
+
+
+
+
 void control_thread(void)
-{
+{   
     while (1)
     {
         /* get a data item */
         k_msgq_get(&sensing_control_q, &sensor_data, K_FOREVER);
 
         command = right_hand_follower(&sensor_data);
+        // command = 'f';
 
         while (k_msgq_put(&motor_control_q, &command, K_NO_WAIT) != 0)
         {
@@ -31,13 +36,15 @@ void control_thread(void)
             k_msgq_purge(&motor_control_q);
         }
 
-        k_sleep(K_SECONDS(1)); 
+        k_sleep(K_MSEC(1));
     }      
 }
 
 int main(void)
 {
     printk("Micromouse Robot Starting...\n");
+    initSensors();
+    k_timer_start(&read_sensor_timer, K_SECONDS(0), K_SECONDS(3));
     return 0;
 }
 
