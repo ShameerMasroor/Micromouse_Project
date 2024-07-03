@@ -42,7 +42,7 @@ void control_thread(void)
 
 void chalja_algo(void){
     while(1){
-    wallFollower(&maze, path, &sensor_data);
+    right_hand_follower(&sensor_data);
     k_sleep(K_SECONDS(1));
     }
 }
