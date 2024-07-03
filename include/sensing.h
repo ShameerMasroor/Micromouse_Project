@@ -8,6 +8,8 @@
 #define STACK_SIZE 2048
 #define PRIORITY 7
 
+extern struct k_msgq sensing_control_q;
+
 typedef struct{
     ir *IR_Left;
     ir *IR_Front;
@@ -20,7 +22,7 @@ typedef struct{
 } sensor_data_t;
 
 void initSensors(void);
-void readSensors();
-void sensor_thread();
+void readSensors(void);
+void sensor_thread(void);
 
 #endif // SENSING_H

@@ -328,15 +328,6 @@
 // #error "Unsupported board: btn0 devicetree alias is not defined"
 // #endif
 
-
-// #if !DT_NODE_HAS_STATUS(ULTRASONIC_TRIG, okay)
-// #error "Unsupported board: trig devicetree alias is not defined"
-// #endif
-
-// #if !DT_NODE_HAS_STATUS(ULTRASONIC_ECHO, okay)
-// #error "Unsupported board: echo devicetree alias is not defined"
-// #endif
-
 // struct led {
 //     struct gpio_dt_spec spec;
 //     uint8_t num;
@@ -355,11 +346,6 @@
 // static const struct button btn0 = {
 //     .btn_spec = GPIO_DT_SPEC_GET_OR(BTN0_NODE, gpios, {0}),
 //     .btn_num = 0,
-// };
-
-// static const struct ultrasonic ultrasonic = {
-//     .trig_spec = GPIO_DT_SPEC_GET_OR(ULTRASONIC_TRIG, gpios, {0}),
-//     .echo_spec = GPIO_DT_SPEC_GET_OR(ULTRASONIC_ECHO, gpios, {0}),
 // };
 
 // void blink(const struct button *btn, uint32_t btn_id, const struct led *led, uint32_t id) {
