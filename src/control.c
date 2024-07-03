@@ -34,9 +34,16 @@ void control_thread(void)
         /* get a data item */
         k_msgq_get(&sensing_control_q, &sensor_data, K_FOREVER);
         printk("Rcvd in control \n ");
-        if(sensor_data.ir_data.left_ir_data)
+        
+        if(sensor_data.ir_data.left_ir_data){
             printk(" left data here \n"); 
-    }
+        }
+
+        right_hand_follower(&sensor_data);
+        k_sleep(K_SECONDS(1)); 
+        }
+
+        
     
 }
 
@@ -55,6 +62,6 @@ int main(void) {
     return 0;
 }
 
-K_THREAD_DEFINE(algo_thread_id, STACK_SIZE, chalja_algo, NULL, NULL, NULL, 14, 0, 0);
-K_THREAD_DEFINE(control_thread_id, STACK_SIZE, control_thread, NULL, NULL, NULL, -16, 0, 0);
+// K_THREAD_DEFINE(algo_thread_id, STACK_SIZE, chalja_algo, NULL, NULL, NULL, 14, 0, 0);
+K_THREAD_DEFINE(control_thread_id, STACK_SIZE, control_thread, NULL, NULL, NULL, 10, 0, 0);
 

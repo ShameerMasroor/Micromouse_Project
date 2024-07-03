@@ -113,6 +113,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
+            printk("Going forwards\n");
             break;
 
         case 'b':  //backwards
@@ -120,6 +121,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 1);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 1);
+            printk("Going backwards\n");
             break;
 
         case 'r':  //right
@@ -127,6 +129,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
+            printk("Going right\n");
             break;
 
         case 'l':  //left
@@ -134,6 +137,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 1);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
+            printk("Going left\n");
             break;
 
         case 'h':  //halt
@@ -141,6 +145,7 @@ void setMotorDirection(char direction){
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 0);
+            printk("HALT!!!!\n");
             break;
 
         default: //you may add break here in default in case the system doesnt perform correctly
