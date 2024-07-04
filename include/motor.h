@@ -15,6 +15,12 @@ typedef struct {
     const struct  pwm_dt_spec enB;
 } motors;
 
+typedef struct
+{
+    char command;
+    double pwm_data;
+} feedback_t;
+
 void init_motors(void);
 void setMotorDirection(char direction);
 void set_Speed(float m1_speed, float m2_speed, const motors *motors);

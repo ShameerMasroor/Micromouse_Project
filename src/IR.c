@@ -25,12 +25,10 @@ static ir ir_front={.d_out=front_pin};
 static ir_data_t ir_data;
 
 
-void init_IR(ir *IR_left, ir *IR_front) {
+void init_IR(void) {
     int rett;
-    IR_left = &ir_left;            //do think about this :/
-    IR_front = &ir_front;
    // Configure the voltage pin as an output
-   rett = gpio_pin_configure_dt(&(IR_left->d_out), GPIO_INPUT);
+   rett = gpio_pin_configure_dt(&ir_left.d_out, GPIO_INPUT);
    
    if (rett < 0) 
    {
@@ -38,7 +36,7 @@ void init_IR(ir *IR_left, ir *IR_front) {
     return;
    }
 
-   rett = gpio_pin_configure_dt(&(IR_front->d_out), GPIO_INPUT);
+   rett = gpio_pin_configure_dt(&ir_front.d_out, GPIO_INPUT);
    
    if (rett < 0) 
    {
@@ -50,18 +48,16 @@ void init_IR(ir *IR_left, ir *IR_front) {
    printk("IR sensors initialized\n");
 }
 
-ir_data_t read_IR(ir *IR_left, ir *IR_front)
+ir_data_t read_IR(void)
 {
-    IR_left = &ir_left;
-    IR_front = &ir_front;
-    bool wall_left = gpio_pin_get_dt(&(IR_left-> d_out));
+    bool wall_left = gpio_pin_get_dt(&ir_left.d_out);
     // printf( wall_left);
     if (wall_left)
         printk("Left Wall detected\n");
      else
         printk("Left Wall absent\n");
 
-    bool wall_front = gpio_pin_get_dt(&(IR_front-> d_out));
+    bool wall_front = gpio_pin_get_dt(&ir_front.d_out);
     if (wall_front)
         printk("Front Wall detected\n");
     else

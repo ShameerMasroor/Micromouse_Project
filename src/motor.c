@@ -1,5 +1,4 @@
 #include "../include/motor.h"
-// #include "../include/shared_mutex.h"  // Include the shared header file
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/pwm.h>
@@ -7,7 +6,7 @@
 #define STACKSIZE 2048
 #define PRIORITY 7
 
-K_MSGQ_DEFINE(motor_control_q, sizeof(char), 10, 1);
+K_MSGQ_DEFINE(motor_control_q, sizeof(feedback_t), 10, 1);
 
 #define IN1 DT_ALIAS(in1)
 #define IN2 DT_ALIAS(in2)
@@ -24,7 +23,7 @@ static motors motor = {
     .enB = PWM_DT_SPEC_GET(DT_ALIAS(pwm_m2)),
 };
 
-static char command;
+static feedback_t feedback;
 
 float percent_to_period_A = 0;
 float percent_to_period_B = 0;
@@ -141,17 +140,18 @@ void set_Speed(float m1_speed, float m2_speed, const motors *motors)
 void motor_thread(void)
 {
     init_motors();
-    percent_to_period_A = 0.45*motor.enA.period;
-    percent_to_period_B = 0.5*motor.enB.period;
-    set_Speed(percent_to_period_A, percent_to_period_B, &motor);
     while (1)
     {
-        k_msgq_get(&motor_control_q, &command, K_FOREVER); 
+        k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
+        
+        percent_to_period_A = feedback.pwm_data*motor.enA.period;
+        percent_to_period_B = 0.5*motor.enB.period;
+        set_Speed(percent_to_period_A, percent_to_period_B, &motor);
 
         // printk("Motor thread running\n");
 
         // printk("Motor direction setting\n");
-        setMotorDirection(command);
+        setMotorDirection(feedback.command);
     }
 
     k_sleep(K_MSEC(1));

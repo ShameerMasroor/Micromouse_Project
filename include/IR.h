@@ -18,5 +18,5 @@ typedef struct
    bool back_ir_data;
 } ir_data_t;
 
-void init_IR(ir *IR_left, ir *IR_front);
-ir_data_t read_IR(ir *IR_left, ir *IR_front);
+void init_IR(void);
+ir_data_t read_IR(void);

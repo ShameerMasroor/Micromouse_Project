@@ -1,20 +1,22 @@
 #include "../include/sensing.h"
 // #include "../include/sensing_control_q.h"
 
-static sensors_t sensor;
-static sensor_data_t sensor_data = {.ir_data = NULL};
+//static sensors_t sensor;
+static sensor_data_t sensor_data;
 
 K_MSGQ_DEFINE(sensing_control_q, sizeof(sensor_data_t), 10, 1);
 
 void initSensors() 
 {
-    init_IR(sensor.IR_Left, sensor.IR_Front);
+    init_IR();
+    init_encoders();
     printk("Sensors Initialized :) \n");
 }
 
 void readSensors() 
 {
-    sensor_data.ir_data = read_IR(sensor.IR_Left, sensor.IR_Front);
+    sensor_data.ir_data = read_IR();
+    sensor_data.encoder_data = speed_matcher();
 }
 
 

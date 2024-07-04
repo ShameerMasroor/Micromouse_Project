@@ -13,12 +13,9 @@
 #define STACK_SIZE 2048
 #define PRIORITY 7
 
-static sensor_data_t sensor_data = { .ir_data = NULL };
-static char command;
+static sensor_data_t sensor_data;
 
-
-
-
+static feedback_t feedback;
 
 void control_thread(void)
 {   
@@ -27,10 +24,11 @@ void control_thread(void)
         /* get a data item */
         k_msgq_get(&sensing_control_q, &sensor_data, K_FOREVER);
 
-        command = right_hand_follower(&sensor_data);
-        // command = 'f';
+        // feedback.command = right_hand_follower(&sensor_data);
+        feedback.pwm_data = sensor_data.encoder_data;
+        feedback.command = 'f';
 
-        while (k_msgq_put(&motor_control_q, &command, K_NO_WAIT) != 0)
+        while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
         {
             /* message queue is full: purge old data & try again */
             k_msgq_purge(&motor_control_q);
