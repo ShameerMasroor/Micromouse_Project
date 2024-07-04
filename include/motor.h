@@ -3,6 +3,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/pwm.h>
+#include <stdio.h>
 
 extern struct k_msgq motor_control_q;
 
@@ -18,7 +19,8 @@ typedef struct {
 typedef struct
 {
     char command;
-    double pwm_data;
+    double pwm_data_left;
+    double pwm_data_right;
 } feedback_t;
 
 void init_motors(void);

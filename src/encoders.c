@@ -63,24 +63,40 @@ void init_encoders()
     printk("Encoders initialized\n");
 }
 
-const double kp=0.003;
-const double kd=0.001;
-double control_signal=0;
+const double kp=0.00031;
+const double kd=0;
+double control_signal_left=0;
+double control_signal_right=0;
 static int error=0;  // the number of counts is always an integer number
 static int difference=0;
 static int last_error=0;
-double base_pwm = 0.5;
+double base_pwm_r = 0.39;
+double base_pwm_l = 0.4;
 //const double base_pwm= 0.5;
 
-double speed_matcher()
+double speed_matcher_right()
 {
     error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
-    printf("The error is %d \n", error);
+    // printf("The error is %d \n", error);
     difference = error - last_error;
-    printf("The difference is %d \n", difference);
-    control_signal = base_pwm + (kp * error + kd * difference);  // PD controller
+    // printf("The difference is %d \n", difference);
+    control_signal_right = base_pwm_r + (kp * error + kd * difference);  // PD controller
 
-    printf("Control PWM = %lf \n", control_signal);
+    // printf("Control PWM = %lf \n", control_signal);
     last_error = error;
-    return control_signal;
+    return control_signal_right;
+}
+
+
+double speed_matcher_left()
+{
+    error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
+    // printf("The error is %d \n", error);
+    difference = error - last_error;
+    // printf("The difference is %d \n", difference);
+    control_signal_left = base_pwm_l - (kp * error + kd * difference);  // PD controller
+
+    // printf("Control PWM = %lf \n", control_signal);
+    last_error = error;
+    return control_signal_left;
 }

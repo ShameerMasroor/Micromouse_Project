@@ -25,7 +25,8 @@ void control_thread(void)
         k_msgq_get(&sensing_control_q, &sensor_data, K_FOREVER);
 
         // feedback.command = right_hand_follower(&sensor_data);
-        feedback.pwm_data = sensor_data.encoder_data;
+        feedback.pwm_data_left = sensor_data.encoder_data_left;
+        feedback.pwm_data_right = sensor_data.encoder_data_right;
         feedback.command = 'f';
 
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
@@ -34,7 +35,7 @@ void control_thread(void)
             k_msgq_purge(&motor_control_q);
         }
 
-        k_sleep(K_MSEC(1));
+        // k_sleep(K_MSEC(1));
     }      
 }
 
@@ -42,7 +43,7 @@ int main(void)
 {
     printk("Micromouse Robot Starting...\n");
     initSensors();
-    k_timer_start(&read_sensor_timer, K_SECONDS(0), K_SECONDS(3));
+    k_timer_start(&read_sensor_timer, K_SECONDS(0), K_SECONDS(1));
     return 0;
 }
 

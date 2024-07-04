@@ -16,7 +16,9 @@ void initSensors()
 void readSensors() 
 {
     sensor_data.ir_data = read_IR();
-    sensor_data.encoder_data = speed_matcher();
+    sensor_data.encoder_data_left = speed_matcher_left();
+    sensor_data.encoder_data_right = speed_matcher_right();
+
 }
 
 
@@ -36,7 +38,7 @@ void sensor_thread(void) //producer thread
             
         }
         printk("Put data into the sensor queue.\n");
-        k_sleep(K_MSEC(1));
+        // k_sleep(K_MSEC(1));
         /* data item was successfully added to message queue */
     }
 }

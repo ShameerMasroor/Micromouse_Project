@@ -22,7 +22,8 @@ extern struct k_timer read_sensor_timer;
 
 typedef struct{
     ir_data_t ir_data;
-    double encoder_data;
+    double encoder_data_left;
+    double encoder_data_right;
     //you may define an ultrasonic struct
 } sensor_data_t;
 

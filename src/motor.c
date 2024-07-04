@@ -144,8 +144,10 @@ void motor_thread(void)
     {
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
         
-        percent_to_period_A = feedback.pwm_data*motor.enA.period;
-        percent_to_period_B = 0.5*motor.enB.period;
+        percent_to_period_A = feedback.pwm_data_left*motor.enA.period;
+        percent_to_period_B = feedback.pwm_data_right*motor.enB.period;
+        printf("Control PWM of left= %lf \n", feedback.pwm_data_left);
+        printf("Control PWM of right= %lf \n", feedback.pwm_data_right);
         set_Speed(percent_to_period_A, percent_to_period_B, &motor);
 
         // printk("Motor thread running\n");
