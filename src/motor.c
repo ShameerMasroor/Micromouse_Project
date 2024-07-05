@@ -93,8 +93,8 @@ void setMotorDirection(char direction)
         case 'b':  //backwards
             gpio_pin_set_dt(&in1, 0);
             gpio_pin_set_dt(&in2, 1);
-            gpio_pin_set_dt(&in3, 1);
-            gpio_pin_set_dt(&in4, 0);
+            gpio_pin_set_dt(&in3, 0);
+            gpio_pin_set_dt(&in4, 1);
             printk("Going backwards\n");
             break;
 
@@ -144,10 +144,10 @@ void motor_thread(void)
     {
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
         
-        percent_to_period_A = feedback.pwm_data_left*motor.enA.period;
+        percent_to_period_A = 0.4*motor.enA.period;
         percent_to_period_B = feedback.pwm_data_right*motor.enB.period;
-        printf("Control PWM of left= %lf \n", feedback.pwm_data_left);
-        printf("Control PWM of right= %lf \n", feedback.pwm_data_right);
+        // printf("Control PWM of left= %lf \n", 0.4);
+        // printf("Control PWM of right= %lf \n", feedback.pwm_data_right);
         set_Speed(percent_to_period_A, percent_to_period_B, &motor);
 
         // printk("Motor thread running\n");

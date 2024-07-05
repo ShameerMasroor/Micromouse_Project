@@ -13,3 +13,4 @@ typedef struct
 void init_encoders();
 double speed_matcher_left();
 double speed_matcher_right();
+double general_speed_matcher();

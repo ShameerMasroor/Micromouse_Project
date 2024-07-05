@@ -19,20 +19,20 @@ static const struct gpio_dt_spec left_enc_pin = GPIO_DT_SPEC_GET(LEFT_ENC, gpios
 static const struct gpio_dt_spec right_enc_pin = GPIO_DT_SPEC_GET(RIGHT_ENC, gpios);
 
 encoders_t encoders = {.left_encoder_count = 0, .right_encoder_count = 0, .left_encoder_pin = left_enc_pin,
-                    .right_encoder_pin = right_enc_pin};
+                       .right_encoder_pin = right_enc_pin};
 
 // Callback function for left encoder
 void left_encoder_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
     encoders.left_encoder_count++;
-    printk("Left encoder count: %d\n", encoders.left_encoder_count);
+    // printk("Left encoder count: %d\n", encoders.left_encoder_count);
 }
 
 // Callback function for right encoder
 void right_encoder_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
     encoders.right_encoder_count++;
-    printk("Right encoder count: %d\n", encoders.right_encoder_count);
+    // printk("Right encoder count: %d\n", encoders.right_encoder_count);
 }
 
 static struct gpio_callback left_enc_cb_data;
@@ -63,40 +63,73 @@ void init_encoders()
     printk("Encoders initialized\n");
 }
 
-const double kp=0.00031;
-const double kd=0;
-double control_signal_left=0;
-double control_signal_right=0;
-static int error=0;  // the number of counts is always an integer number
-static int difference=0;
-static int last_error=0;
-double base_pwm_r = 0.39;
+const double kp = 0.00025;
+const double ki = 0.0;
+const double kd = 0.0;
+double control_signal_left = 0;
+double control_signal_right = 0;
+static int error = 0;  // the number of counts is always an integer number
+static int difference = 0;
+static int last_error = 0;
+static double error_sum = 0;
+double base_pwm_r = 0.4;
 double base_pwm_l = 0.4;
-//const double base_pwm= 0.5;
+static int64_t last_time = 0;
+
+double clamp(double value, double min, double max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+}
+
+double get_time_diff()
+{
+    int64_t current_time = k_uptime_get();
+    double time_diff = (current_time - last_time) / 1000.0;  // convert milliseconds to seconds
+    last_time = current_time;
+    return time_diff;
+}
 
 double speed_matcher_right()
 {
+    double time_diff = get_time_diff();
     error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
-    // printf("The error is %d \n", error);
-    difference = error - last_error;
-    // printf("The difference is %d \n", difference);
-    control_signal_right = base_pwm_r + (kp * error + kd * difference);  // PD controller
+    error_sum += error * time_diff;
+    difference = (error - last_error) / time_diff;
 
-    // printf("Control PWM = %lf \n", control_signal);
+    if (error<-3 || error >3){
+    control_signal_right = base_pwm_r + (kp * error + ki * error_sum + kd * difference);  // PID controller
+    control_signal_right = clamp(control_signal_right, 0.0, 1.0);  // Ensure control signal stays within [0, 1]
+    }
+
+    // printk("Right control signal: %lf, Error: %d, Time diff: %lf\n", control_signal_right, error, time_diff);
+    
     last_error = error;
     return control_signal_right;
 }
 
-
 double speed_matcher_left()
 {
+    double time_diff = get_time_diff();
     error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
-    // printf("The error is %d \n", error);
-    difference = error - last_error;
-    // printf("The difference is %d \n", difference);
-    control_signal_left = base_pwm_l - (kp * error + kd * difference);  // PD controller
+    error_sum += error * time_diff;
+    difference = (error - last_error) / time_diff;
 
-    // printf("Control PWM = %lf \n", control_signal);
+    control_signal_left = base_pwm_l - (kp * error + ki * error_sum + kd * difference);  // PID controller
+    control_signal_left = clamp(control_signal_left, 0.0, 1.0);  // Ensure control signal stays within [0, 1]
+
+    printk("Error: %d\n", error);
+
     last_error = error;
     return control_signal_left;
+}
+
+double radius = 6.555;  // cm 
+double revolutions = 0; 
+// double distance_traveled = 0;
+
+double distance()
+{
+    revolutions = (encoders.left_encoder_count + encoders.right_encoder_count) * 3.14159;
+    return (radius * revolutions);
 }
