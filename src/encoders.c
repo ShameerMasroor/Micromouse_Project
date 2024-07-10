@@ -77,8 +77,8 @@ static int error = 0;  // the number of counts is always an integer number
 static int difference = 0;
 static int last_error = 0;
 static double error_sum = 0;
-double base_pwm_r = 0.4;
-double base_pwm_l = 0.4;
+double base_pwm_r = 0.2;
+double base_pwm_l = 0.2;
 static int64_t last_time = 0;
 
 double clamp(double value, double min, double max) {
