@@ -18,8 +18,13 @@
 static const struct gpio_dt_spec left_enc_pin = GPIO_DT_SPEC_GET(LEFT_ENC, gpios);
 static const struct gpio_dt_spec right_enc_pin = GPIO_DT_SPEC_GET(RIGHT_ENC, gpios);
 
+
+
+
 encoders_t encoders = {.left_encoder_count = 0, .right_encoder_count = 0, .left_encoder_pin = left_enc_pin,
                        .right_encoder_pin = right_enc_pin};
+
+
 
 // Callback function for left encoder
 void left_encoder_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
@@ -63,9 +68,9 @@ void init_encoders()
     printk("Encoders initialized\n");
 }
 
-const double kp = 0.00025;
-const double ki = 0.0;
-const double kd = 0.0;
+const double kp = 0.0025;
+const double ki = 0.0001;
+const double kd = 0.00002;
 double control_signal_left = 0;
 double control_signal_right = 0;
 static int error = 0;  // the number of counts is always an integer number
@@ -97,10 +102,10 @@ double speed_matcher_right()
     error_sum += error * time_diff;
     difference = (error - last_error) / time_diff;
 
-    if (error<-3 || error >3){
+    
     control_signal_right = base_pwm_r + (kp * error + ki * error_sum + kd * difference);  // PID controller
-    control_signal_right = clamp(control_signal_right, 0.0, 1.0);  // Ensure control signal stays within [0, 1]
-    }
+    control_signal_right = clamp(control_signal_right, 0.0, 0.5);  // Ensure control signal stays within [0, 1]
+    
 
     // printk("Right control signal: %lf, Error: %d, Time diff: %lf\n", control_signal_right, error, time_diff);
     
@@ -126,10 +131,25 @@ double speed_matcher_left()
 
 double radius = 6.555;  // cm 
 double revolutions = 0; 
-// double distance_traveled = 0;
+
 
 double distance()
 {
     revolutions = (encoders.left_encoder_count + encoders.right_encoder_count) * 3.14159;
     return (radius * revolutions);
 }
+
+
+void speed_detector(){ //to be called periodically at every one second
+    double left_motor_speed = (encoders.left_encoder_count/20.0)*60.0;
+    printf("Left counts = %d \n", encoders.left_encoder_count);
+    printf("Left Motor Speed = %lf RPM \n", left_motor_speed);
+    double right_motor_speed = (encoders.right_encoder_count/20.0)*60.0;
+    printf("Right counts = %d \n", encoders.right_encoder_count);
+    printf("Right Motor Speed = %lf RPM \n", right_motor_speed);
+    encoders.left_encoder_count =0;
+    encoders.right_encoder_count =0;
+
+}
+
+

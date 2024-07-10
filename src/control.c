@@ -10,6 +10,7 @@
 #include "../include/uart.h"
 #include "../include/sensing.h"
 
+
 #define STACK_SIZE 2048
 #define PRIORITY 7
 
@@ -44,6 +45,7 @@ int main(void)
     printk("Micromouse Robot Starting...\n");
     initSensors();
     k_timer_start(&read_sensor_timer, K_SECONDS(0), K_SECONDS(1));
+    k_timer_start(&read_speed_timer, K_SECONDS(0), K_SECONDS(1));
     return 0;
 }
 

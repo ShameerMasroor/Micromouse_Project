@@ -1,6 +1,9 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 
+extern struct k_timer read_speed_timer;
+
+
 typedef struct
 {
    uint32_t left_encoder_count;
@@ -10,7 +13,10 @@ typedef struct
    
 } encoders_t;
 
+
 void init_encoders();
 double speed_matcher_left();
 double speed_matcher_right();
 double general_speed_matcher();
+void speed_detector();
+
