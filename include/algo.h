@@ -3,7 +3,38 @@
 
 #include "sensing.h"
 
+#define RIGHT_HAND 1
+#define FLOOD_FILL 2
+#define A_STAR 3
+
+#define SELECTED_ALGORITHM FLOOD_FILL
+
+#if SELECTED_ALGORITHM == RIGHT_HAND
 char right_hand_follower(sensor_data_t *received_data);
+#endif
+
+#if SELECTED_ALGORITHM == FLOOD_FILL
+
+typedef struct{
+    point North;
+    point South;
+    point East;
+    point West;
+} Neighbours; 
+
+typedef struct
+{
+    int x{0};
+    int y{0};
+} point;
+
+
+void floodfill(void);
+#endif
+
+#if SELECTED_ALGORITHM == A_STAR
+void a_star();
+#endif
 
 #endif
 
