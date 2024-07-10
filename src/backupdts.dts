@@ -95,23 +95,35 @@
 
 		motor_right_in1: motor_right_in1
 		{
-			gpios= <&gpioc 0 GPIO_ACTIVE_HIGH>;
+			gpios= <&gpiob 0 GPIO_ACTIVE_HIGH>;
 		};
 
 		motor_right_in2: motor_right_in2
 		{
-			gpios= <&gpioc 1 GPIO_ACTIVE_HIGH>;
+			gpios= <&gpiob 1 GPIO_ACTIVE_HIGH>;
 		};
 
 		motor_left_in3: motor_left_in3
 		{
-			gpios= <&gpiof 4 GPIO_ACTIVE_HIGH>;
+			gpios= <&gpioc 0 GPIO_ACTIVE_HIGH>;
 		};
 
 		motor_left_in4: motor_left_in4
 		{
-			gpios= <&gpiof 2 GPIO_ACTIVE_HIGH>;
+			gpios= <&gpioc 1 GPIO_ACTIVE_HIGH>;
 		};
+
+		encoder_left: encoder_left
+		{
+			gpios = <&gpioc 6 GPIO_ACTIVE_LOW>;
+		};
+
+		encoder_right: encoder_right
+		{
+			gpios = <&gpioc 8 GPIO_ACTIVE_LOW>;
+		};
+
+
 
 
 };
@@ -135,6 +147,8 @@
 		volt-sensor1 = &vbat;
 		pwm-m1 = &pwm_m1;
 		pwm-m2 = &pwm_m2;
+		enc-left = &encoder_left;
+		enc-right = &encoder_right;
 
 		in1 =&motor_right_in1;
 		in2 =&motor_right_in2;
@@ -155,13 +169,7 @@
 				pwms = <&pwm2 2 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
 			};
 
-
-		
-
-
 	};
-
-		
 
 };
 
@@ -218,7 +226,7 @@
 	clock-frequency = <I2C_BITRATE_FAST>;
 
 	lsm303dlhc_magn: lsm303dlhc-magn@1e {
-		compatible = "st,lsm303dlhc-magn";
+		compatible = "st,lis2mdl", "st,lsm303agr-magn";
 		reg = <0x1e>;
 	};
 
@@ -242,6 +250,12 @@
 		     &spi1_miso_pa6 &spi1_mosi_pa7>;
 	pinctrl-names = "default";
 	status = "okay";
+	cs-gpios = <&gpioe 3 GPIO_ACTIVE_LOW>;
+	i3g4250d@0 {
+		compatible = "st,i3g4250d";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+	};
 };
 
 &spi2 {
@@ -250,6 +264,8 @@
 	pinctrl-names = "default";
 	status = "okay";
 };
+
+
 
 zephyr_udc0: &usb {
 	pinctrl-0 = <&usb_dm_pa11 &usb_dp_pa12>;
@@ -300,8 +316,6 @@ zephyr_udc0: &usb {
 		pinctrl-0 = <&tim1_ch1_pe9>;
 		pinctrl-names = "default";
 	};
-
-
 };
 
 &timers4 {
@@ -313,7 +327,6 @@ zephyr_udc0: &usb {
 		pinctrl-names = "default";
 	};
 };
-
 
 
 &adc1 {
