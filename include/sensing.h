@@ -19,6 +19,7 @@ typedef struct{
     double encoder_data_left;
     double encoder_data_right;
     double yaw_angle;
+    double ref_yaw;
     double yaw_controlled_pwm_right;
     double yaw_controlled_pwm_left;
  

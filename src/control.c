@@ -30,6 +30,8 @@ void control_thread(void)
         feedback.pwm_data_right = sensor_data.encoder_data_right;
         feedback.yaw_controlled_pwm_right = sensor_data.yaw_controlled_pwm_right;
         feedback.yaw_controlled_pwm_left = sensor_data.yaw_controlled_pwm_left;
+        feedback.yaw_angle = sensor_data.yaw_angle;
+        feedback.ref_yaw = sensor_data.ref_yaw;
         feedback.command = 'f';
 
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)

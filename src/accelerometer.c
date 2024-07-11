@@ -69,9 +69,9 @@ double readIMU()
 	pitch = pitch *57.3;
 	yaw = yaw * 57.3;
 
-	if (yaw < 0){
-		yaw = 180 + yaw;
-	}
+	// if (yaw < 0){
+	// 	yaw = 180 + yaw;
+	// }
 
 	//to store the reference yaw angle once
 	if (flag==0){
@@ -79,7 +79,14 @@ double readIMU()
 		flag=1;
 	}
 
+	// if (abs(current_yaw_angle - yaw)>100){
+	// 	return current_yaw_angle;
+	// }
+
 	current_yaw_angle = yaw;
+
+	
+
 	printf("Ref. Yaw angle: %lf \n", ref_yaw_angle);
 	// printf("Pitch angle: %lf \n", pitch);
 	printf("Current Yaw angle: %lf \n", yaw);
@@ -139,14 +146,14 @@ double get_time_diff_accel()
     return time_diff;
 }
 
-const double kp_accel = 0.02;  //0.02 is a good value for a single right motor
-const double ki_accel = 0.0;
+const double kp_accel = 0.009;  //0.02 is a good value for a single right motor
+const double ki_accel = 0.000;
 const double kd_accel = 0.008; //0.008 is a good value for a single right motor
 
 double direction_controller_right()
 {
 	
-	double base_pwm_r = 0.5;
+	double base_pwm_r = 0.55;
 	// double base_pwm_l = 0.3;	
     double time_diff = get_time_diff_accel();
     error_a = (ref_yaw_angle - current_yaw_angle); // error_a between the two motors
@@ -155,7 +162,7 @@ double direction_controller_right()
 
     
     control_signal_right_accel = base_pwm_r + (kp_accel * error_a + ki_accel * error_a_sum + kd_accel * difference_a);  // PID controller
-    control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.4, 0.7);  // Ensure control signal stays within [0, 1]
+    control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.4, 0.65);  // Ensure control signal stays within [0, 1]
     
     // printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
     
@@ -176,7 +183,7 @@ double direction_controller_left()
 
     
     control_signal_left_accel = base_pwm_l - (kp_accel * error_a + ki_accel * error_a_sum + kd_accel * difference_a);  // PID controller
-    control_signal_left_accel = clamp_accel(control_signal_right_accel, 0.4, 0.7);  // Ensure control signal stays within [0, 1]
+    control_signal_left_accel = clamp_accel(control_signal_right_accel, 0.4, 0.65);  // Ensure control signal stays within [0, 1]
     
     // printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
     
@@ -186,3 +193,6 @@ double direction_controller_left()
     return control_signal_left_accel;
 }
 
+double return_ref_yaw(){
+	return ref_yaw_angle;
+}

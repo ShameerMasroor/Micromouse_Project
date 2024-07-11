@@ -159,7 +159,7 @@ void motor_thread(void)
         setMotorDirection(feedback.command);
     }
 
-    k_sleep(K_MSEC(1));
+    // k_sleep(K_MSEC(1));
 }
 
 K_THREAD_DEFINE(motors_id, STACKSIZE, motor_thread, NULL, NULL, NULL, PRIORITY, 0, 0);

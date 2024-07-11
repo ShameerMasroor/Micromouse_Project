@@ -23,6 +23,8 @@ typedef struct
     double pwm_data_right;
     double yaw_controlled_pwm_right;
     double yaw_controlled_pwm_left;
+    double yaw_angle;
+    double ref_yaw;
 } feedback_t;
 
 void init_motors(void);

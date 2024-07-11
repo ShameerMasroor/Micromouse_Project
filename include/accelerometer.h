@@ -19,4 +19,5 @@ void initIMU(void);
 double readIMU();
 double direction_controller_right();
 double direction_controller_left();
+double return_ref_yaw();
 #endif // ACCELEROMETER_H
