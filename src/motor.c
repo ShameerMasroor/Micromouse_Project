@@ -87,7 +87,7 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
-            printk("Going forwards\n");
+            // printk("Going forwards\n");
             break;
 
         case 'b':  //backwards
@@ -134,7 +134,7 @@ void set_Speed(float m1_speed, float m2_speed, const motors *motors)
 {
     pwm_set_pulse_dt(&(motors->enA),m1_speed); 
     pwm_set_pulse_dt(&(motors->enB),m2_speed);
-    printk("Motor Speeds Set\n");
+    // printk("Motor Speeds Set\n");
 }
 
 void motor_thread(void)
@@ -144,8 +144,11 @@ void motor_thread(void)
     {
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
         
-        percent_to_period_A = feedback.pwm_data_left*motor.enA.period;
-        percent_to_period_B = feedback.pwm_data_right*motor.enB.period;
+        percent_to_period_A = feedback.yaw_controlled_pwm_left*motor.enA.period;
+        // percent_to_period_B = feedback.pwm_data_right*motor.enB.period;
+        percent_to_period_B = feedback.yaw_controlled_pwm_right*motor.enB.period;
+
+        //you can use yaw controlled pwm here
         // printf("Control PWM of left= %lf \n", 0.4);
         // printf("Control PWM of right= %lf \n", feedback.pwm_data_right);
         set_Speed(percent_to_period_A, percent_to_period_B, &motor);

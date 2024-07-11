@@ -10,6 +10,7 @@ void initSensors()
 {
     init_IR();
     init_encoders();
+    initIMU();
     printk("Sensors Initialized :) \n");
 }
 
@@ -18,19 +19,19 @@ void readSensors()
     sensor_data.ir_data = read_IR();
     sensor_data.encoder_data_left = speed_matcher_left();
     sensor_data.encoder_data_right = speed_matcher_right();
+    sensor_data.yaw_controlled_pwm_right = direction_controller_right();
+    sensor_data.yaw_controlled_pwm_left = direction_controller_left();
+    sensor_data.yaw_angle = readIMU();
     // sensor_data.encoder_left_count = encoders.left_encoder_count;
     // sensor_data.encoder_right_count = encoders.right_encoder_count;
 
 }
 
 
-
-
-
-
 void sensor_thread(void) //producer thread
 {
     initSensors();
+    
     while (1) {
         readSensors();
         /*send data to consumers */
@@ -39,7 +40,7 @@ void sensor_thread(void) //producer thread
             k_msgq_purge(&sensing_control_q);
             
         }
-        printk("Put data into the sensor queue.\n");
+        // printk("Put data into the sensor queue.\n");
         // k_sleep(K_MSEC(1));
         /* data item was successfully added to message queue */
     }
@@ -58,10 +59,10 @@ void my_work_handler(struct k_work *work) {   //THE WORK OBJECT WILL HAVE THIS F
             k_msgq_purge(&sensing_control_q);
             
         }
-        printk("Data successfully into the sensor queue.\n");
+        // printk("Data successfully into the sensor queue.\n");
         // k_sleep(K_MSEC(1));
         /* data item was successfully added to message queue */
-    printk("Work handler called\n");
+    // printk("Work handler called\n");
     // Add your custom processing here
 }
 

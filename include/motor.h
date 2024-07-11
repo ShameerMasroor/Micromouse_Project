@@ -21,6 +21,8 @@ typedef struct
     char command;
     double pwm_data_left;
     double pwm_data_right;
+    double yaw_controlled_pwm_right;
+    double yaw_controlled_pwm_left;
 } feedback_t;
 
 void init_motors(void);

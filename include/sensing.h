@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "IR.h"
 #include "encoders.h"
+#include "accelerometer.h"
 
 #define STACK_SIZE 2048
 #define PRIORITY 7
@@ -17,6 +18,9 @@ typedef struct{
     ir_data_t ir_data;
     double encoder_data_left;
     double encoder_data_right;
+    double yaw_angle;
+    double yaw_controlled_pwm_right;
+    double yaw_controlled_pwm_left;
  
 } sensor_data_t;
 

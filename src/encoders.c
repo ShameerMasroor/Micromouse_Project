@@ -68,18 +68,18 @@ void init_encoders()
     printk("Encoders initialized\n");
 }
 
-const double kp = 0.0025;
-const double ki = 0.0001;
-const double kd = 0.00002;
-double control_signal_left = 0;
-double control_signal_right = 0;
+
+static double control_signal_left = 0;
+static double control_signal_right = 0;
 static int error = 0;  // the number of counts is always an integer number
 static int difference = 0;
 static int last_error = 0;
 static double error_sum = 0;
-double base_pwm_r = 0.2;
-double base_pwm_l = 0.2;
-static int64_t last_time = 0;
+const double kp = 0.0025;
+const double ki = 0.0001;
+const double kd = 0.00002;
+
+
 
 double clamp(double value, double min, double max) {
     if (value < min) return min;
@@ -89,6 +89,7 @@ double clamp(double value, double min, double max) {
 
 double get_time_diff()
 {
+    static int64_t last_time = 0;
     int64_t current_time = k_uptime_get();
     double time_diff = (current_time - last_time) / 1000.0;  // convert milliseconds to seconds
     last_time = current_time;
@@ -97,6 +98,7 @@ double get_time_diff()
 
 double speed_matcher_right()
 {
+    double base_pwm_r = 0.2;
     double time_diff = get_time_diff();
     error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
     error_sum += error * time_diff;
@@ -115,6 +117,7 @@ double speed_matcher_right()
 
 double speed_matcher_left()
 {
+    static double base_pwm_l = 0.2;
     double time_diff = get_time_diff();
     error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
     error_sum += error * time_diff;
@@ -123,7 +126,7 @@ double speed_matcher_left()
     control_signal_left = base_pwm_l - (kp * error + ki * error_sum + kd * difference);  // PID controller
     control_signal_left = clamp(control_signal_left, 0.0, 1.0);  // Ensure control signal stays within [0, 1]
 
-    printk("Error: %d\n", error);
+    // printk("Error: %d\n", error);
 
     last_error = error;
     return control_signal_left;
@@ -142,10 +145,10 @@ double distance()
 
 void speed_detector(){ //to be called periodically at every one second
     double left_motor_speed = (encoders.left_encoder_count/20.0)*60.0;
-    printf("Left counts = %d \n", encoders.left_encoder_count);
+    // printf("Left counts = %d \n", encoders.left_encoder_count);
     printf("Left Motor Speed = %lf RPM \n", left_motor_speed);
     double right_motor_speed = (encoders.right_encoder_count/20.0)*60.0;
-    printf("Right counts = %d \n", encoders.right_encoder_count);
+    // printf("Right counts = %d \n", encoders.right_encoder_count);
     printf("Right Motor Speed = %lf RPM \n", right_motor_speed);
     encoders.left_encoder_count =0;
     encoders.right_encoder_count =0;

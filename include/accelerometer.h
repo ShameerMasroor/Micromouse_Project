@@ -6,7 +6,7 @@
 #include <zephyr/drivers/sensor.h>
 #include <stdio.h>
 #include <zephyr/sys/util.h>
-
+#include <math.h>
 // typedef struct
 // {
 //     void;
@@ -15,7 +15,8 @@
 // static int32_t initAccelerometer(const struct device *sensor,
 // 			   enum sensor_channel channel);
 // void readAccelerometer(accel_t accel);
-void initAccelerometer(void);
-static int32_t readAccelerometer(const struct device *sensor, enum sensor_channel channel);
-
+void initIMU(void);
+double readIMU();
+double direction_controller_right();
+double direction_controller_left();
 #endif // ACCELEROMETER_H
