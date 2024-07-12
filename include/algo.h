@@ -15,21 +15,23 @@ char right_hand_follower(sensor_data_t *received_data);
 
 #if SELECTED_ALGORITHM == FLOOD_FILL
 
-typedef struct{
-    point North{0,0};
-    point South{0,0};
-    point East{0,0};
-    point West{0,0};
-} Neighbours; 
+ 
 
 typedef struct
 {
-    int x{0};
-    int y{0};
+    int x;
+    int y;
 } point;
 
+typedef struct{
+    point North;
+    point South;
+    point East;
+    point West;
+} Neighbours;
 
-void floodfill(void);
+
+char floodfill(sensor_data_t *received_data);
 #endif
 
 #if SELECTED_ALGORITHM == A_STAR

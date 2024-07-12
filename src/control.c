@@ -25,7 +25,7 @@ void control_thread(void)
         /* get a data item */
         k_msgq_get(&sensing_control_q, &sensor_data, K_FOREVER);
 
-        feedback.command = right_hand_follower(&sensor_data);
+        feedback.command = floodfill(&sensor_data);
         feedback.pwm_data_left = sensor_data.encoder_data_left;
         feedback.pwm_data_right = sensor_data.encoder_data_right;
         // feedback.command = 'f';
