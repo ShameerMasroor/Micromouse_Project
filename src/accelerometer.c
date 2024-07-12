@@ -146,9 +146,9 @@ double get_time_diff_accel()
     return time_diff;
 }
 
-const double kp_accel = 0.009;  //0.02 is a good value for a single right motor
+const double kp_accel = 0.0012;  //0.02 is a good value for a single right motor
 const double ki_accel = 0.000;
-const double kd_accel = 0.008; //0.008 is a good value for a single right motor
+const double kd_accel = 0.00007; //0.008 is a good value for a single right motor
 
 double direction_controller_right()
 {
@@ -160,14 +160,14 @@ double direction_controller_right()
     error_a_sum += error_a * time_diff;
     difference_a = (error_a - last_error_a) / time_diff;
 
-    
-    control_signal_right_accel = base_pwm_r + (kp_accel * error_a + ki_accel * error_a_sum + kd_accel * difference_a);  // PID controller
-    control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.4, 0.65);  // Ensure control signal stays within [0, 1]
-    
+    double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
+    control_signal_right_accel = 0.5 + value;  // PID controller
+    control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
+    printf("Controller value: %lf \n", value);
     // printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
     
     last_error_a = error_a;
-	// printf("Motor Controlled PWM %lf \n", control_signal_right_accel);
+	printf("Right Motor PWM %lf \n", control_signal_right_accel);
     return control_signal_right_accel;
 }
 
@@ -181,15 +181,15 @@ double direction_controller_left()
     error_a_sum += error_a * time_diff;
     difference_a = (error_a - last_error_a) / time_diff;
 
-    
-    control_signal_left_accel = base_pwm_l - (kp_accel * error_a + ki_accel * error_a_sum + kd_accel * difference_a);  // PID controller
-    control_signal_left_accel = clamp_accel(control_signal_right_accel, 0.4, 0.65);  // Ensure control signal stays within [0, 1]
-    
+    double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
+    control_signal_left_accel = 0.48 - value;  // PID controller
+    control_signal_left_accel = clamp_accel(control_signal_left_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
+    printf("Controller value: %lf \n", value);
     // printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
     
     last_error_a = error_a;
-	// printf("Motor Controlled PWM %lf \n", control_signal_right_accel);
-	control_signal_left_accel=0.5;
+	printf("Left Motor PWM %lf \n", control_signal_left_accel);
+	// control_signal_left_accel=0.5;
     return control_signal_left_accel;
 }
 

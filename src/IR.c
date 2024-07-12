@@ -52,16 +52,16 @@ ir_data_t read_IR(void)
 {
     bool wall_left = gpio_pin_get_dt(&ir_left.d_out);
     // printf( wall_left);
-    if (wall_left)
-        printk("Left Wall detected\n");
-     else
-        printk("Left Wall absent\n");
+    // if (wall_left)
+    //     printk("Left Wall detected\n");
+    //  else
+    //     printk("Left Wall absent\n");
 
     bool wall_front = gpio_pin_get_dt(&ir_front.d_out);
-    if (wall_front)
-        printk("Front Wall detected\n");
-    else
-        printk("Front Wall absent\n");
+    // if (wall_front)
+    //     printk("Front Wall detected\n");
+    // else
+    //     printk("Front Wall absent\n");
 
     ir_data.left_ir_data = wall_left;
     ir_data.front_ir_data =wall_front;

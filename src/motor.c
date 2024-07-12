@@ -144,9 +144,9 @@ void motor_thread(void)
     {
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
         
-        percent_to_period_A = feedback.yaw_controlled_pwm_left*motor.enA.period;
+        percent_to_period_A = (feedback.yaw_controlled_pwm_left)*motor.enA.period;
         // percent_to_period_B = feedback.pwm_data_right*motor.enB.period;
-        percent_to_period_B = feedback.yaw_controlled_pwm_right*motor.enB.period;
+        percent_to_period_B = (feedback.yaw_controlled_pwm_right)*motor.enB.period;
 
         //you can use yaw controlled pwm here
         // printf("Control PWM of left= %lf \n", 0.4);

@@ -146,10 +146,10 @@ double distance()
 void speed_detector(){ //to be called periodically at every one second
     double left_motor_speed = (encoders.left_encoder_count/20.0)*60.0;
     // printf("Left counts = %d \n", encoders.left_encoder_count);
-    printf("Left Motor Speed = %lf RPM \n", left_motor_speed);
+    // printf("Left Motor Speed = %lf RPM \n", left_motor_speed);
     double right_motor_speed = (encoders.right_encoder_count/20.0)*60.0;
     // printf("Right counts = %d \n", encoders.right_encoder_count);
-    printf("Right Motor Speed = %lf RPM \n", right_motor_speed);
+    // printf("Right Motor Speed = %lf RPM \n", right_motor_speed);
     encoders.left_encoder_count =0;
     encoders.right_encoder_count =0;
 
