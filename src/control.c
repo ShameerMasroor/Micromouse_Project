@@ -30,6 +30,8 @@ void control_thread(void)
         feedback.pwm_data_right = sensor_data.encoder_data_right;
         // feedback.command = 'f';
 
+        //enter cell turning update block
+
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
         {
             /* message queue is full: purge old data & try again */

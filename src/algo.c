@@ -26,6 +26,7 @@ char right_hand_follower(sensor_data_t *received_data)
 }
 
 //==============================================================================
+
 //==============================================================================
 
 #define SIZE 16
@@ -42,6 +43,19 @@ int flood[rows][cols] = {{4, 3, 2, 2, 3, 4},
                          {3, 2, 1, 1, 2, 3},
                          {4, 3, 2, 2, 3, 4}};
 int md{0};
+typedef enum {
+    N,
+    E,
+    S,
+    W
+} Orientation;
+
+Orientation Orient = N;
+static point Position = {0,0};
+int ds{100};
+int dn{100};
+int de{100};
+int dw{100};
 
 void push(const point element)
 {
@@ -65,39 +79,34 @@ bool isempty()
     return (top_index == -1);
 }
 
-Neighbours get_neighbours(point location)
+char getTurn(point location, Orientation current, Orientation newDirection) 
 {
-    Neighbours neighbours;
-    if (x > 0)
+    int diff = (newDirection - current + 4) % 4;
+    switch (diff) 
     {
-        neighbours.West.x = location.x - 1;
-        neighbours.West.y = location.y;
-    }
-    if (x < (cols - 1))
-    {
-        neighbours.East.x = location.x + 1;
-        neighbours.East.y = location.y;
-    }
-    if (y > 0)
-    {
-        neighbours.South.x = location.x;
-        neighbours.South.y = location.y - 1;
-    }
-    if (y < (rows - 1))
-    {
-        neighbours.North.x = location.x;
-        neighbours.North.y = location.y + 1;
-    }
-    return neighbours;
-}
+        case 0:
+        location.y ++;
+        return 'f';
 
-bool pushable(point location)
-{
-    return !((location.x == 3 || location.x == 2) && (location.y == 2 || location.y == 3));
+        case 1:
+        location.x ++;
+        return 'r';
+        
+        case 2:
+        location.y --;
+        return 'b';
+
+        case 3:
+        location.x --;
+        return 'l';
+
+        default:
+        return 'h';  // Default case, should not happen
+    }
 }
 
 // Function to update walls
-void updateWalls(point location, int orient, sensor_data_t *recieved_data) {
+void updateWalls(point location, Orientation orient, sensor_data_t *recieved_data) {
     bool left_wall = received_data->ir_data.left_ir_data;
     bool right_wall = received_data->ir_data.right_ir_data;
     bool front_wall = received_data->ir_data.front_ir_data;
@@ -171,66 +180,90 @@ void updateWalls(point location, int orient, sensor_data_t *recieved_data) {
     }
 }
 
-// Function to check if the mouse can move from (x, y) to (x1, y1)
-bool isAccessible(point location, point location1) {
-    if (x == x1) {
-        if (y > y1) { // south
-        if (cells[neighbours.South.y][location.x] == 4 || cells[location.y][location.x] == 5 || cells[location.y][location.x] == 6 || 
-            cells[location.y][location.x] == 10 || cells[location.y][location.x] == 11 || cells[location.y][location.x] == 12 || 
-            cells[location.y][location.x] == 14) {
-            return false;
-        } else {
-            return true;
-        }
-        } else { // north
-            if (cells[location.y][location.x] == 2 || cells[location.y][location.x] == 7 || cells[location.y][location.x] == 8 || 
-                cells[location.y][location.x] == 10 || cells[location.y][location.x] == 12 || cells[location.y][location.x] == 13 || 
-                cells[location.y][location.x] == 14) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    } else if (y == y1) {
-        if (x > x1) { // west
-            if (cells[location.y][location.x] == 1 || cells[location.y][location.x] == 5 || cells[location.y][location.x] == 8 || 
-                cells[location.y][location.x] == 9 || cells[location.y][location.x] == 11 || cells[location.y][location.x] == 13 || 
-                cells[location.y][location.x] == 14) {
-                return false;
-            } else {
-                return true;
-            }
-        } else { // east
-            if (cells[location.y][location.x] == 3 || cells[location.y][location.x] == 6 || cells[location.y][location.x] == 7 || 
-                cells[location.y][location.x] == 9 || cells[location.y][location.x] == 11 || cells[location.y][location.x] == 12 || 
-                cells[location.y][location.x] == 13) {
-                return false;
-            } else {
-                return true;
-            }
-        }
+Neighbours get_neighbours(point location)
+{
+    Neighbours neighbours;
+    if (x > 0)
+    {
+        neighbours.West.x = location.x - 1;
+        neighbours.West.y = location.y;
     }
-    return false;
+    if (x < (cols - 1))
+    {
+        neighbours.East.x = location.x + 1;
+        neighbours.East.y = location.y;
+    }
+    if (y > 0)
+    {
+        neighbours.South.x = location.x;
+        neighbours.South.y = location.y - 1;
+    }
+    if (y < (rows - 1))
+    {
+        neighbours.North.x = location.x;
+        neighbours.North.y = location.y + 1;
+    }
+    return neighbours;
 }
 
-/// need to check for openable
-bool check_distance(point location)
+bool pushable(point location)
+{
+    return !((location.x == 3 || location.x == 2) && (location.y == 2 || location.y == 3));
+}
+
+// Function to check if the mouse can move from current location (x, y) to its neighbours
+bool isAccessible(point location, char direction) {
+    if (direction == 'S')
+        return (cells[location.y][location.x] == 4 || cells[location.y][location.x] == 5 || cells[location.y][location.x] == 6 || 
+            cells[location.y][location.x] == 10 || cells[location.y][location.x] == 11 || cells[location.y][location.x] == 12 || 
+            cells[location.y][location.x] == 14)
+    else if (direction == 'N')
+        return (cells[location.y][location.x] == 2 || cells[location.y][location.x] == 7 || cells[location.y][location.x] == 8 || 
+                cells[location.y][location.x] == 10 || cells[location.y][location.x] == 12 || cells[location.y][location.x] == 13 || 
+                cells[location.y][location.x] == 14)
+    else if (direction == 'W')
+        return (cells[location.y][location.x] == 1 || cells[location.y][location.x] == 5 || cells[location.y][location.x] == 8 || 
+                cells[location.y][location.x] == 9 || cells[location.y][location.x] == 11 || cells[location.y][location.x] == 13 || 
+                cells[location.y][location.x] == 14)
+    else if (direction == 'E') 
+        return (cells[location.y][location.x] == 3 || cells[location.y][location.x] == 6 || cells[location.y][location.x] == 7 || 
+                cells[location.y][location.x] == 9 || cells[location.y][location.x] == 11 || cells[location.y][location.x] == 12 || 
+                cells[location.y][location.x] == 13)
+}
+
+void get_md(point location)
 {
     Neighbours neighbours = get_neighbours(location);
-
     
-    int de = flood[neighbours.East.y][neighbours.East.x];
-    if (de < md)
-        de = md;
-    int dw = flood[neighbours.West.y][neighbours.West.x];
-    if (dw < de)
-        dw = md;
-    int dn = flood[neighbours.North.y][neighbours.North.x];
-    if (dn < md)
-        dn = md;
-    int ds = flood[neighbours.South.y][neighbours.South.x];
-    if (ds < md)
-        ds = md;
+    if isAccessible(location, 'S')
+    {
+        ds = flood[neighbours.South.y][neighbours.South.x];
+        if (ds < md)
+            md = ds;
+    }
+    if isAccessible(location, 'N')
+    {
+        dn = flood[neighbours.North.y][neighbours.North.x];
+        if (dn < md)
+            md = dn;
+    }
+    if isAccessible(location, 'W')
+    {
+        dw = flood[neighbours.West.y][neighbours.West.x];
+        if (dw < md)
+            md = dw;
+    }
+    if isAccessible(location, 'E')
+    {
+        de = flood[neighbours.East.y][neighbours.East.x];
+        if (de < md)
+            md = de;
+    }
+}
+
+bool check_distance(point location)
+{
+    get_md(location);
     return (md != (flood[location.y][location.x] - 1))
 }
 
@@ -247,49 +280,10 @@ void populate(void)
         push(neighbours.South);   
 } 
 
-
-
-if (orient == 'N')
+char floodfill(sensor_data_t *recieved_data)
 {
-
-}
-
-
-
-
-
-int orientation(int orient, char turning)
-{
-    if (turning == 'L')
-    {
-        orient -= 1;
-        if (orient == -1)
-            orient = 3;
-    }
-    else if (turning == 'R')
-    {
-        orient += 1;
-        if (orient == 4)
-            orient = 0;
-    }
-    else if (turning == 'B')
-    {
-        if (orient == 0)
-            orient = 2;
-        else if (orient == 1)
-            orient = 3;
-        else if (orient == 2)
-            orient = 0;
-        else if (orient == 3)
-            orient = 1;
-    }
-    return orient;
-}
-
-void floodfill(void)
-{
-    point location;
-    push(location);
+    push(Position);
+    updateWalls(Position, Orient, recieved_data);
     while (!isempty(Stack))
     {
         point loc = pop();
@@ -297,6 +291,29 @@ void floodfill(void)
         if (check_distance(loc))
             populate();
     }
+
+    get_md(Position);
+    if (md == dn)
+    {
+        return getTurn(Position,Orient, N);
+        Orient = N;
+    }
+    else if (md == dw)
+    {
+        return getTurn(Position, Orient, W);
+        Orient = W;
+    }
+    else if (md == de)
+    {
+        return getTurn(Position, Orient, E);
+        Orient = E;
+    }
+    else
+    {
+        return getTurn(Position, Orient, S);
+        Orient = S;
+    }
+
 }
 
 //=====================================================================

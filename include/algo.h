@@ -16,10 +16,10 @@ char right_hand_follower(sensor_data_t *received_data);
 #if SELECTED_ALGORITHM == FLOOD_FILL
 
 typedef struct{
-    point North;
-    point South;
-    point East;
-    point West;
+    point North{0,0};
+    point South{0,0};
+    point East{0,0};
+    point West{0,0};
 } Neighbours; 
 
 typedef struct
