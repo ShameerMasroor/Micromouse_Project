@@ -3,6 +3,7 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/pwm.h>
 
+
 #define STACKSIZE 2048
 #define PRIORITY 7
 
@@ -104,6 +105,7 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
             printk("Going right\n");
+            right_turn();
             break;
 
         case 'l':  //left
@@ -112,6 +114,8 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
             printk("Going left\n");
+            left_turn();
+            
             break;
 
         case 'h':  //halt
@@ -156,6 +160,7 @@ void motor_thread(void)
         // printk("Motor thread running\n");
 
         // printk("Motor direction setting\n");
+        
         setMotorDirection(feedback.command);
     }
 

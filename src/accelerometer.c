@@ -8,6 +8,7 @@
 double ref_yaw_angle;
 double current_yaw_angle;
 bool flag=0;
+int controller_enabled =0;
 
 const struct device *const accelerometer = DEVICE_DT_GET_ONE(st_lis2dh);
 const struct device *const magnetometer = DEVICE_DT_GET_ONE(st_lis2mdl);
@@ -146,53 +147,117 @@ double get_time_diff_accel()
     return time_diff;
 }
 
-const double kp_accel = 0.0012;  //0.02 is a good value for a single right motor
+const double kp_accel = 0.0014;  //0.02 is a good value for a single right motor
 const double ki_accel = 0.000;
 const double kd_accel = 0.00007; //0.008 is a good value for a single right motor
+const double turn_speed = 0.3;
+
 
 double direction_controller_right()
 {
-	
-	double base_pwm_r = 0.55;
-	// double base_pwm_l = 0.3;	
-    double time_diff = get_time_diff_accel();
-    error_a = (ref_yaw_angle - current_yaw_angle); // error_a between the two motors
-    error_a_sum += error_a * time_diff;
-    difference_a = (error_a - last_error_a) / time_diff;
+	if (controller_enabled==0){
+		double base_pwm_r = 0.55;
+		// double base_pwm_l = 0.3;	
+		double time_diff = get_time_diff_accel();
+		error_a = (ref_yaw_angle - current_yaw_angle); // error_a between the two motors
+		error_a_sum += error_a * time_diff;
+		difference_a = (error_a - last_error_a) / time_diff;
 
-    double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
-    control_signal_right_accel = 0.5 + value;  // PID controller
-    control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
-    printf("Controller value: %lf \n", value);
-    // printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
-    
-    last_error_a = error_a;
-	printf("Right Motor PWM %lf \n", control_signal_right_accel);
-    return control_signal_right_accel;
+		double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
+		control_signal_right_accel = 0.4 + value;  // PID controller
+		control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
+		printf("Controller value: %lf \n", value);
+		// printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
+		
+		last_error_a = error_a;
+		printf("Right Motor PWM %lf \n", control_signal_right_accel);
+		return control_signal_right_accel;
+	}
+
+	//for the right turn
+	else if (controller_enabled==1){
+		if(abs(current_yaw_angle-ref_yaw_angle) >= (90)){
+			// control_signal_right_accel = 0.3;
+			controller_enabled=0;
+			ref_yaw_angle = current_yaw_angle;
+			// return 0.3;
+		}
+		return turn_speed;
+
+	}
+
+	//for the left turn
+	else if (controller_enabled==2){
+		if(abs(ref_yaw_angle-current_yaw_angle) >= (90)){
+			// control_signal_right_accel = 0.3;
+			controller_enabled=0;
+			ref_yaw_angle = current_yaw_angle;
+			// return 0.3;
+		}
+		return turn_speed;
+
+	}
 }
 
 double direction_controller_left()
 {
-	
-	double base_pwm_l = 0.45;
-	// double base_pwm_l = 0.3;	
-    double time_diff = get_time_diff_accel();
-    error_a = (ref_yaw_angle - current_yaw_angle); // error_a between the two motors
-    error_a_sum += error_a * time_diff;
-    difference_a = (error_a - last_error_a) / time_diff;
+	if (controller_enabled ==0){
+		double base_pwm_l = 0.45;
+		// double base_pwm_l = 0.3;	
+		double time_diff = get_time_diff_accel();
+		error_a = (ref_yaw_angle - current_yaw_angle); // error_a between the two motors
+		error_a_sum += error_a * time_diff;
+		difference_a = (error_a - last_error_a) / time_diff;
 
-    double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
-    control_signal_left_accel = 0.48 - value;  // PID controller
-    control_signal_left_accel = clamp_accel(control_signal_left_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
-    printf("Controller value: %lf \n", value);
-    // printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
-    
-    last_error_a = error_a;
-	printf("Left Motor PWM %lf \n", control_signal_left_accel);
-	// control_signal_left_accel=0.5;
-    return control_signal_left_accel;
+		double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
+		control_signal_left_accel = 0.39 - value;  // PID controller
+		control_signal_left_accel = clamp_accel(control_signal_left_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
+		printf("Controller value: %lf \n", value);
+		// printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
+		
+		last_error_a = error_a;
+		printf("Left Motor PWM %lf \n", control_signal_left_accel);
+		// control_signal_left_accel=0.5;
+		return control_signal_left_accel;
+	}
+
+	else if (controller_enabled==1){
+		if(abs(current_yaw_angle-ref_yaw_angle) >= (90)){
+			// control_signal_right_accel = 0.3;
+			controller_enabled=0;
+			ref_yaw_angle = current_yaw_angle;
+			// return 0.3;
+		}
+		return turn_speed;
+
+	}
+
+	//for the left turn
+	else if (controller_enabled==2){
+		if(abs(ref_yaw_angle-current_yaw_angle) >= (90)){
+			// control_signal_right_accel = 0.3;
+			controller_enabled=0;
+			ref_yaw_angle = current_yaw_angle;
+			// return 0.3;
+		}
+		
+		
+		return turn_speed;
+
+	}
 }
 
 double return_ref_yaw(){
 	return ref_yaw_angle;
+}
+void right_turn(){
+	controller_enabled = 1;	
+}
+
+void left_turn(){
+	controller_enabled = 2;	
+}
+
+int enable_returner(){
+	return controller_enabled;
 }

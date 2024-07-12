@@ -20,4 +20,7 @@ double readIMU();
 double direction_controller_right();
 double direction_controller_left();
 double return_ref_yaw();
+void right_turn(void);
+void left_turn(void);
+int enable_returner();
 #endif // ACCELEROMETER_H

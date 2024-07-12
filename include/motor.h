@@ -4,6 +4,7 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/drivers/pwm.h>
 #include <stdio.h>
+#include "accelerometer.h" 
 
 extern struct k_msgq motor_control_q;
 
