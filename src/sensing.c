@@ -23,6 +23,8 @@ void readSensors()
     sensor_data.yaw_controlled_pwm_left = direction_controller_left();
     sensor_data.yaw_angle = readIMU();
     sensor_data.ref_yaw = return_ref_yaw();
+    sensor_data.left_enc_count = return_left_enc_count();
+    sensor_data.right_enc_count = return_right_enc_count();
     // sensor_data.encoder_left_count = encoders.left_encoder_count;
     // sensor_data.encoder_right_count = encoders.right_encoder_count;
 

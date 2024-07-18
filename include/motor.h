@@ -26,9 +26,12 @@ typedef struct
     double yaw_controlled_pwm_left;
     double yaw_angle;
     double ref_yaw;
+    int left_enc_count;
+    int right_enc_count;
 } feedback_t;
 
 void init_motors(void);
 void setMotorDirection(char direction);
 void set_Speed(float m1_speed, float m2_speed, const motors *motors);
 void motor_thread(void);
+void turn_right();

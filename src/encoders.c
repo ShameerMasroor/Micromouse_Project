@@ -30,6 +30,7 @@ encoders_t encoders = {.left_encoder_count = 0, .right_encoder_count = 0, .left_
 void left_encoder_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
     encoders.left_encoder_count++;
+    encoders.rotation_left_counter++;
     // printk("Left encoder count: %d\n", encoders.left_encoder_count);
 }
 
@@ -37,6 +38,7 @@ void left_encoder_callback(const struct device *dev, struct gpio_callback *cb, u
 void right_encoder_callback(const struct device *dev, struct gpio_callback *cb, uint32_t pins)
 {
     encoders.right_encoder_count++;
+    encoders.rotation_right_counter++;
     // printk("Right encoder count: %d\n", encoders.right_encoder_count);
 }
 
@@ -179,4 +181,11 @@ void speed_detector(){ //to be called periodically at every one second
 
 }
 
+int return_left_enc_count(){
+    return encoders.rotation_left_counter;
+}
 
+
+int return_right_enc_count(){
+    return encoders.rotation_right_counter;
+}

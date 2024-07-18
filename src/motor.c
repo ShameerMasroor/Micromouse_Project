@@ -106,7 +106,8 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
             printk("Going right\n");
-            set_direction('r');
+            // set_direction('r');
+            turn_right();
             // while (release_return()==0){
 
             // }
@@ -120,8 +121,8 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
             printk("Going left\n");
-            set_direction('l');
-            // left_turn();
+            // set_direction('l');
+            turn_left();
             
             break;
 
@@ -148,6 +149,7 @@ void set_Speed(float m1_speed, float m2_speed, const motors *motors)
     // printk("Motor Speeds Set\n");
 }
 
+// bool turn_flag =1;
 void motor_thread(void)
 {
     init_motors();
@@ -169,6 +171,7 @@ void motor_thread(void)
         // printk("Motor direction setting\n");
         // if (release_return() & !return_go_forward()){
         setMotorDirection(feedback.command);
+        // turn_flag =1;
         // }
 
         // else if (return_go_forward()){
@@ -181,6 +184,79 @@ void motor_thread(void)
     }
 
     // k_sleep(K_MSEC(1));
+}
+
+void turn_right(){
+    
+    setMotorDirection('h');
+    k_sleep(K_MSEC(1000));
+    int encoder_left_count=0;
+    // if (turn_flag==1){
+    encoder_left_count = feedback.left_enc_count + 14;
+    // int current_left_encoder_count = feedback.left_enc_count;
+    // }
+
+    // turn_flag=0;
+    percent_to_period_A = (0.4)*motor.enA.period;
+    percent_to_period_B = (0.4)*motor.enB.period;
+    set_Speed(percent_to_period_A, percent_to_period_B, &motor);
+
+    while (feedback.left_enc_count<encoder_left_count){
+        k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
+        printf("Encoder left count: %d \n", encoder_left_count);
+        printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        gpio_pin_set_dt(&in1, 1);
+        gpio_pin_set_dt(&in2, 0);
+        gpio_pin_set_dt(&in3, 0);
+        gpio_pin_set_dt(&in4, 1);
+        printf("Stuck in while loop\n");
+    }
+
+    setMotorDirection('h');
+    k_sleep(K_MSEC(1000));
+
+    setMotorDirection('f');
+    
+    k_sleep(K_MSEC(700));
+    setMotorDirection('h');
+    
+}
+
+
+void turn_left(){
+    
+    setMotorDirection('h');
+    k_sleep(K_MSEC(1000));
+    int encoder_left_count=0;
+    // if (turn_flag==1){
+    encoder_left_count = feedback.left_enc_count + 16;
+    // int current_left_encoder_count = feedback.left_enc_count;
+    // }
+
+    // turn_flag=0;
+    percent_to_period_A = (0.4)*motor.enA.period;
+    percent_to_period_B = (0.4)*motor.enB.period;
+    set_Speed(percent_to_period_A, percent_to_period_B, &motor);
+
+    while (feedback.left_enc_count<encoder_left_count){
+        k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
+        printf("Encoder left count: %d \n", encoder_left_count);
+        printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        gpio_pin_set_dt(&in1,0 );
+        gpio_pin_set_dt(&in2, 1);
+        gpio_pin_set_dt(&in3, 1);
+        gpio_pin_set_dt(&in4, 0);
+        printf("Stuck in while loop\n");
+    }
+
+    setMotorDirection('h');
+    k_sleep(K_MSEC(1000));
+
+    setMotorDirection('f');
+    
+    k_sleep(K_MSEC(1000));
+    setMotorDirection('h');
+    
 }
 
 K_THREAD_DEFINE(motors_id, STACKSIZE, motor_thread, NULL, NULL, NULL, PRIORITY, 0, 0);
