@@ -88,6 +88,7 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
+            set_direction('f');
             // printk("Going forwards\n");
             break;
 
@@ -105,7 +106,12 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
             printk("Going right\n");
-            right_turn();
+            set_direction('r');
+            // while (release_return()==0){
+
+            // }
+
+            // right_turn();
             break;
 
         case 'l':  //left
@@ -114,7 +120,8 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
             printk("Going left\n");
-            left_turn();
+            set_direction('l');
+            // left_turn();
             
             break;
 
@@ -148,9 +155,9 @@ void motor_thread(void)
     {
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
         
-        percent_to_period_A = (feedback.yaw_controlled_pwm_left)*motor.enA.period;
+        percent_to_period_A = (feedback.pwm_data_left)*motor.enA.period;
         // percent_to_period_B = feedback.pwm_data_right*motor.enB.period;
-        percent_to_period_B = (feedback.yaw_controlled_pwm_right)*motor.enB.period;
+        percent_to_period_B = (feedback.pwm_data_right)*motor.enB.period;
 
         //you can use yaw controlled pwm here
         // printf("Control PWM of left= %lf \n", 0.4);
@@ -160,8 +167,17 @@ void motor_thread(void)
         // printk("Motor thread running\n");
 
         // printk("Motor direction setting\n");
-        
+        // if (release_return() & !return_go_forward()){
         setMotorDirection(feedback.command);
+        // }
+
+        // else if (return_go_forward()){
+        //     setMotorDirection('f');
+        //     k_sleep(K_MSEC(1000));
+        //     set_return_go_forward(0);
+        // }
+
+        
     }
 
     // k_sleep(K_MSEC(1));

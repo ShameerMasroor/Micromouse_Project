@@ -75,10 +75,8 @@ static int error = 0;  // the number of counts is always an integer number
 static int difference = 0;
 static int last_error = 0;
 static double error_sum = 0;
-const double kp = 0.0025;
-const double ki = 0.0001;
-const double kd = 0.00002;
 
+const double set_pointRPM = 90;
 
 
 double clamp(double value, double min, double max) {
@@ -96,39 +94,66 @@ double get_time_diff()
     return time_diff;
 }
 
+const double KP = 0.05;
+const double KI = 0.005;
+const double KD = 0.0;
+const double DT = 0.05;
+const double MAX_OUT = 0.75;
+
 double speed_matcher_right()
 {
+    const double scale_p_right = 0.5;
+    const double scale_i_right = 0.5;
+
+    int32_t  delta_slit;
+    delta_slit = encoders.right_encoder_count; 
+    float partial_rot = 0.0;
+    partial_rot = (float)delta_slit/20.0f;
+    double current_right_rpm = (double)(partial_rot*600.0f);
     double base_pwm_r = 0.2;
-    double time_diff = get_time_diff();
-    error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
-    error_sum += error * time_diff;
-    difference = (error - last_error) / time_diff;
+    double time_diff = 0.001;//get_time_diff();
+    error = (set_pointRPM - current_right_rpm); // error between the two motors
+    error_sum += error;
 
     
-    control_signal_right = base_pwm_r + (kp * error + ki * error_sum + kd * difference);  // PID controller
-    control_signal_right = clamp(control_signal_right, 0.0, 0.5);  // Ensure control signal stays within [0, 1]
+    control_signal_right = base_pwm_r + (scale_p_right * KP * error + scale_i_right * KI * error_sum * DT);  // PID controller
+    control_signal_right = clamp(control_signal_right, base_pwm_r, MAX_OUT);  // Ensure control signal stays within [0, 1]
     
-
-    // printk("Right control signal: %lf, Error: %d, Time diff: %lf\n", control_signal_right, error, time_diff);
-    
-    last_error = error;
+    printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
+    // printf("Right control signal: %lf\n", control_s600ignal_right);
+        //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
+    encoders.right_encoder_count =0;
     return control_signal_right;
 }
 
+
+
+
+static double error_left;
+static double last_error_left;
+static double time_diff_left;
+static double error_sum_left;
+static double control_signal_left;
 double speed_matcher_left()
 {
-    static double base_pwm_l = 0.2;
-    double time_diff = get_time_diff();
-    error = (encoders.left_encoder_count - encoders.right_encoder_count); // error between the two motors
-    error_sum += error * time_diff;
-    difference = (error - last_error) / time_diff;
+    const double scale_p_left = 0.53;
+    const double scale_i_left = 0.53;   
+   double current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*600.0f;
 
-    control_signal_left = base_pwm_l - (kp * error + ki * error_sum + kd * difference);  // PID controller
-    control_signal_left = clamp(control_signal_left, 0.0, 1.0);  // Ensure control signal stays within [0, 1]
+    double base_pwm_l = 0.2;
+    time_diff_left = 0.001;//get_time_diff();
+    error_left = (set_pointRPM - current_left_rpm); // error between the two motors
+    error_sum_left += error_left;
 
-    // printk("Error: %d\n", error);
+    
+    control_signal_left = base_pwm_l + (scale_p_left * KP * error + scale_i_left * KI * error_sum * DT);  // PID controller
+    control_signal_left = clamp(control_signal_left, base_pwm_l, MAX_OUT);  // Ensure control signal stays within [0, 1]
+    printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
 
-    last_error = error;
+    // printf("Right control signal: %lf\n", control_signal_right);
+    
+    encoders.left_encoder_count =0;
+    //printf("Left Motor Speed = %lf RPM \n", current_left_rpm);
     return control_signal_left;
 }
 
@@ -145,10 +170,9 @@ double distance()
 
 void speed_detector(){ //to be called periodically at every one second
     double left_motor_speed = (encoders.left_encoder_count/20.0)*60.0;
-    // printf("Left counts = %d \n", encoders.left_encoder_count);
-    // printf("Left Motor Speed = %lf RPM \n", left_motor_speed);
+    printf("Left counts = %d \n", encoders.left_encoder_count);
     double right_motor_speed = (encoders.right_encoder_count/20.0)*60.0;
-    // printf("Right counts = %d \n", encoders.right_encoder_count);
+    printf("Right counts = %d \n", encoders.right_encoder_count);
     // printf("Right Motor Speed = %lf RPM \n", right_motor_speed);
     encoders.left_encoder_count =0;
     encoders.right_encoder_count =0;

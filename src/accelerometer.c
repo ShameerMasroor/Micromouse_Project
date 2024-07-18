@@ -9,7 +9,11 @@ double ref_yaw_angle;
 double current_yaw_angle;
 bool flag=0;
 int controller_enabled =0;
+bool release_command=1;
+bool go_forward_a_bit=0;
 
+
+char command_dir;
 const struct device *const accelerometer = DEVICE_DT_GET_ONE(st_lis2dh);
 const struct device *const magnetometer = DEVICE_DT_GET_ONE(st_lis2mdl);
 
@@ -88,9 +92,9 @@ double readIMU()
 
 	
 
-	printf("Ref. Yaw angle: %lf \n", ref_yaw_angle);
+	// printf("Ref. Yaw angle: %lf \n", ref_yaw_angle);
 	// printf("Pitch angle: %lf \n", pitch);
-	printf("Current Yaw angle: %lf \n", yaw);
+	// printf("Current Yaw angle: %lf \n", yaw);
 	// printf("( x y z ) = ( %f  %f  %f )\n", (sensor_value_to_double(&val[0])*57.3),
 	// 				       (sensor_value_to_double(&val[1])*57.3),
 	// 				       (sensor_value_to_double(&val[2])*57.3));
@@ -155,7 +159,7 @@ const double turn_speed = 0.3;
 
 double direction_controller_right()
 {
-	if (controller_enabled==0){
+	if (command_dir == 'f'){
 		double base_pwm_r = 0.55;
 		// double base_pwm_l = 0.3;	
 		double time_diff = get_time_diff_accel();
@@ -166,42 +170,61 @@ double direction_controller_right()
 		double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
 		control_signal_right_accel = 0.4 + value;  // PID controller
 		control_signal_right_accel = clamp_accel(control_signal_right_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
-		printf("Controller value: %lf \n", value);
+		// printf("Controller value: %lf \n", value);
 		// printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
 		
 		last_error_a = error_a;
-		printf("Right Motor PWM %lf \n", control_signal_right_accel);
+		// printf("Right Motor PWM %lf \n", control_signal_right_accel);
 		return control_signal_right_accel;
 	}
 
 	//for the right turn
-	else if (controller_enabled==1){
-		if(abs(current_yaw_angle-ref_yaw_angle) >= (90)){
+	else if (command_dir == 'r'){
+		int target_angle = current_yaw_angle - 90;
+
+		if(target_angle <=-180){
+			target_angle +=360;
+		}
+
+		if((current_yaw_angle-target_angle) >= (90)){
 			// control_signal_right_accel = 0.3;
-			controller_enabled=0;
+			// controller_enabled=0;
+			release_command = 1;
 			ref_yaw_angle = current_yaw_angle;
+			go_forward_a_bit =1;
 			// return 0.3;
 		}
+		// release_command = 1;
 		return turn_speed;
 
 	}
 
 	//for the left turn
-	else if (controller_enabled==2){
-		if(abs(ref_yaw_angle-current_yaw_angle) >= (90)){
+	else if (command_dir == 'l'){
+		int target_angle = current_yaw_angle + 45;
+
+		if(target_angle >180){
+			target_angle -=360;
+		}
+
+		if((ref_yaw_angle-current_yaw_angle) >= 90){
 			// control_signal_right_accel = 0.3;
-			controller_enabled=0;
+			// controller_enabled=0;
+			release_command = 1;
 			ref_yaw_angle = current_yaw_angle;
+			go_forward_a_bit =1;
 			// return 0.3;
 		}
 		return turn_speed;
 
 	}
+
+	return turn_speed;
 }
 
 double direction_controller_left()
 {
-	if (controller_enabled ==0){
+	if (command_dir == 'f'){
 		double base_pwm_l = 0.45;
 		// double base_pwm_l = 0.3;	
 		double time_diff = get_time_diff_accel();
@@ -212,39 +235,56 @@ double direction_controller_left()
 		double value = (kp_accel * error_a +ki_accel * error_a_sum + kd_accel * difference_a);
 		control_signal_left_accel = 0.39 - value;  // PID controller
 		control_signal_left_accel = clamp_accel(control_signal_left_accel, 0.3, 0.65);  // Ensure control signal stays within [0, 1]
-		printf("Controller value: %lf \n", value);
+		// printf("Controller value: %lf \n", value);
 		// printk("Right control signal: %lf, error_a: %d, Time diff: %lf\n", control_signal_right, error_a, time_diff);
 		
 		last_error_a = error_a;
-		printf("Left Motor PWM %lf \n", control_signal_left_accel);
+		// printf("Left Motor PWM %lf \n", control_signal_left_accel);
 		// control_signal_left_accel=0.5;
 		return control_signal_left_accel;
 	}
 
-	else if (controller_enabled==1){
-		if(abs(current_yaw_angle-ref_yaw_angle) >= (90)){
+	else if (command_dir == 'r'){
+		int target_angle = current_yaw_angle - 90;
+
+		if(target_angle <=-180){
+			target_angle +=360;
+		}
+
+		if((current_yaw_angle-target_angle) >= (90)){
 			// control_signal_right_accel = 0.3;
-			controller_enabled=0;
+			// controller_enabled=0;
+			release_command = 1;
 			ref_yaw_angle = current_yaw_angle;
+			go_forward_a_bit =1;
 			// return 0.3;
 		}
+		// release_command = 1;
 		return turn_speed;
 
 	}
 
 	//for the left turn
-	else if (controller_enabled==2){
-		if(abs(ref_yaw_angle-current_yaw_angle) >= (90)){
+	else if (command_dir == 'l'){
+		int target_angle = current_yaw_angle + 90;
+
+		if(target_angle >180){
+			target_angle -=360;
+		}
+
+		if((ref_yaw_angle-current_yaw_angle) >= (90)){
 			// control_signal_right_accel = 0.3;
-			controller_enabled=0;
+			// controller_enabled=0;
+			release_command = 1;
 			ref_yaw_angle = current_yaw_angle;
+			go_forward_a_bit =1;
 			// return 0.3;
 		}
-		
-		
 		return turn_speed;
 
 	}
+
+	return turn_speed;
 }
 
 double return_ref_yaw(){
@@ -260,4 +300,21 @@ void left_turn(){
 
 int enable_returner(){
 	return controller_enabled;
+}
+
+void set_direction(char dir){
+	command_dir = dir;
+}
+
+bool release_return(){
+	return release_command;
+}
+
+
+bool return_go_forward(){
+	return go_forward_a_bit;
+}
+
+void set_return_go_forward(bool setting){
+	go_forward_a_bit = setting;
 }
