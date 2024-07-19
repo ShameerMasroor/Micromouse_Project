@@ -28,6 +28,7 @@ typedef struct
     double ref_yaw;
     int left_enc_count;
     int right_enc_count;
+    int16_t right_analog_ir;
 } feedback_t;
 
 void init_motors(void);

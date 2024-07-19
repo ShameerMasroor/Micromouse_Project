@@ -25,7 +25,7 @@ void control_thread(void)
         /* get a data item */
         k_msgq_get(&sensing_control_q, &sensor_data, K_FOREVER);
 
-        feedback.command = right_hand_follower(&sensor_data);
+        // feedback.command = right_hand_follower(&sensor_data);
         feedback.pwm_data_left = sensor_data.encoder_data_left;
         feedback.pwm_data_right = sensor_data.encoder_data_right;
         feedback.yaw_controlled_pwm_right = sensor_data.yaw_controlled_pwm_right;
@@ -34,7 +34,8 @@ void control_thread(void)
         feedback.ref_yaw = sensor_data.ref_yaw;
         feedback.left_enc_count = sensor_data.left_enc_count;
         feedback.right_enc_count = sensor_data.right_enc_count;
-        // feedback.command = 'f';
+        feedback.right_analog_ir = sensor_data.ir_data.right_analog_data;
+        feedback.command = 'f';
 
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
         {

@@ -1,6 +1,6 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
-
+#include "IR.h"
 extern struct k_timer read_speed_timer;
 
 
