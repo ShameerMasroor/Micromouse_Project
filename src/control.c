@@ -51,7 +51,7 @@ int main(void)
 {
     printk("Micromouse Robot Starting...\n");
     initSensors();
-    k_timer_start(&read_sensor_timer, K_SECONDS(0), K_MSEC(10)); //40 Hz
+    k_timer_start(&read_sensor_timer, K_SECONDS(0), K_MSEC(50)); //40 Hz
     // k_timer_start(&read_speed_timer, K_SECONDS(0), K_SECONDS(1));
     return 0;
 }
