@@ -77,7 +77,7 @@ static double control_signal_right = 0;
 static int error = 0;  // the number of counts is always an integer number
 static double ir_error =0;
 static double ir_error_sum=0;
-static int difference = 0;
+// static int difference = 0;
 static int last_error = 0;
 static double error_sum = 0;
 
@@ -102,11 +102,15 @@ double get_time_diff()
 const double KP = 0.05;
 const double KI = 0.005;
 const double KD = 0.0;
-const double DT = 0.05;
+const double DT = 0.01;
 const double MAX_OUT = 0.75;
-const double IR_SCALE_RIGHT = 0.03;
-const double IR_SCALE_LEFT = 0.04;
-const double IR_SETPOINT = 300;
+const double IR_SCALE_RIGHT_P = 0.00022;
+// const double IR_SCALE_RIGHT_D = 0.00033;
+const double IR_SCALE_LEFT_P = 0.00032;
+// const double IR_SCALE_LEFT_D = 0.00033;
+const double IR_SETPOINT = 350;
+static double ir_difference=0;
+static double last_error_ir=0;
 
 double speed_matcher_right()
 {
@@ -118,16 +122,19 @@ double speed_matcher_right()
     delta_slit = encoders.right_encoder_count; 
     float partial_rot = 0.0;
     partial_rot = (float)delta_slit/20.0f;
-    double current_right_rpm = (double)(partial_rot*600.0f);
+    double current_right_rpm = (double)(partial_rot*6000.0f);
     double base_pwm_r = 0.2;
     double time_diff = 0.001;//get_time_diff();
     error = (set_pointRPM - current_right_rpm); // error between the two motors
     ir_error = (IR_SETPOINT - analog_ir_val);
     ir_error_sum +=ir_error;
     error_sum += error;
+    ir_difference = ir_error-last_error_ir;
+    last_error_ir = ir_error;
 
     
-    control_signal_right = base_pwm_r + (scale_p_right * KP * (error+IR_SCALE_RIGHT*ir_error) + scale_i_right * KI * (error_sum+IR_SCALE_RIGHT*ir_error_sum) * DT);  // PID controller
+    // control_signal_right = base_pwm_r + (scale_p_right * KP * (error+IR_SCALE_RIGHT*ir_error) + scale_i_right * KI * (error_sum+IR_SCALE_RIGHT*ir_error_sum) * DT);  // PID controller
+    control_signal_right = base_pwm_r + (scale_p_right * KP * (error) + scale_i_right * KI * (error_sum) * DT) + IR_SCALE_RIGHT_P*ir_error ;
     control_signal_right = clamp(control_signal_right, base_pwm_r, MAX_OUT);  // Ensure control signal stays within [0, 1]
     
     printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
@@ -135,7 +142,7 @@ double speed_matcher_right()
         //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
     encoders.right_encoder_count =0;
     
-    printk("Received ADC value %d \n", analog_ir_val);
+    // printk("Received ADC value %d \n", analog_ir_val);
     return control_signal_right;
 }
 
@@ -143,7 +150,7 @@ double speed_matcher_right()
 
 
 static double error_left;
-static double last_error_left;
+// static double last_error_left;
 static double time_diff_left;
 static double error_sum_left;
 static double control_signal_left;
@@ -153,15 +160,16 @@ double speed_matcher_left()
     int16_t analog_ir_val = return_analog();
     const double scale_p_left = 0.53;
     const double scale_i_left = 0.53;   
-    double current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*600.0f;
+    double current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*6000.0f;
 
-    double base_pwm_l = 0.2;
+    double base_pwm_l = 0.25;
     time_diff_left = 0.001;//get_time_diff();
     error_left = (set_pointRPM - current_left_rpm); // error between the two motors
     error_sum_left += error_left;
 
     
-    control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
+    // control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
+    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) - IR_SCALE_LEFT_P*ir_error;
     control_signal_left = clamp(control_signal_left, base_pwm_l, MAX_OUT);  // Ensure control signal stays within [0, 1]
     printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
 

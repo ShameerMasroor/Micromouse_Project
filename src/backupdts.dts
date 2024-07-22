@@ -149,11 +149,12 @@
 		pwm-m2 = &pwm_m2;
 		enc-left = &encoder_left;
 		enc-right = &encoder_right;
-
+		
 		in1 =&motor_right_in1;
 		in2 =&motor_right_in2;
 		in3 =&motor_left_in3;
 		in4 =&motor_left_in4;
+		prox-sensor0 = &adc1;
 		
 
 	};
@@ -330,12 +331,16 @@ zephyr_udc0: &usb {
 
 
 &adc1 {
-	pinctrl-0 = <&adc1_in1_pa0>;
-	pinctrl-names = "default";
-	st,adc-clock-source = <SYNC>;
-	st,adc-prescaler = <2>;
-	status = "okay";
+    label = "ADC_1";
+    pinctrl-0 = <&adc1_in1_pa0>;
+    pinctrl-names = "default";
+    st,adc-clock-source = <SYNC>;
+    st,adc-prescaler = <2>;
+    status = "okay";
 };
+
+
+
 
 &die_temp {
 	status = "okay";
