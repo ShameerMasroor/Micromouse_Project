@@ -1,11 +1,18 @@
 #include <stdbool.h>
 #include "../include/sensing.h"
 
+int cell = 0;
+double rd = 0;
+int prev_distance = 0;
 char right_hand_follower(sensor_data_t *received_data)
 {
     bool ir_right_state = received_data->ir_data.left_ir_data;
     bool ir_front_state = received_data->ir_data.front_ir_data;
-
+    rd = received_data->dist;
+    cell = (int)(rd/16.0);
+    printk("Cell: %d \n", cell);
+    
+    printf("Distance: %lf \n", rd);
     if (ir_right_state && !ir_front_state){
         printk("Go forward\n");
         return 'f';
@@ -18,6 +25,7 @@ char right_hand_follower(sensor_data_t *received_data)
         printk("Go right\n");
         return 'r';
     }
+
 
     return 'h';
 }

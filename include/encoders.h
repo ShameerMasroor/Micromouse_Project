@@ -21,6 +21,7 @@ double speed_matcher_left();
 double speed_matcher_right();
 double general_speed_matcher();
 void speed_detector();
+double distance();
 
 int return_left_enc_count();
 int return_right_enc_count();

@@ -24,6 +24,7 @@ typedef struct{
     double yaw_controlled_pwm_left;
     int left_enc_count;
     int right_enc_count;
+    double dist;
     
  
 } sensor_data_t;

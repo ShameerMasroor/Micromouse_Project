@@ -39,6 +39,7 @@ void readSensors()
     sensor_data.right_enc_count = return_right_enc_count();
     gpio_pin_toggle_dt(&ctrl_led);
     printk("Blah\n");
+    sensor_data.dist = distance();
     // sensor_data.encoder_left_count = encoders.left_encoder_count;
     // sensor_data.encoder_right_count = encoders.right_encoder_count;
 

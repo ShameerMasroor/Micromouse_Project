@@ -182,14 +182,17 @@ double speed_matcher_left()
     return control_signal_left;
 }
 
-double radius = 6.555;  // cm 
+double dia = 6.555;  // cm 
 double revolutions = 0; 
-
+// double circum = 3.14159 * dia;
+double dist = 0;
 
 double distance()
 {
-    revolutions = (encoders.left_encoder_count + encoders.right_encoder_count) * 3.14159;
-    return (radius * revolutions);
+    revolutions = (encoders.rotation_left_counter + encoders.rotation_right_counter) * 1.03 / 40;
+    dist = dia * 3.14159 * revolutions;
+    // printf("Distance: %lf \n", dist);
+    return dist;
 }
 
 
