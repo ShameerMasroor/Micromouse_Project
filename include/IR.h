@@ -19,9 +19,13 @@ typedef struct
    bool front_ir_data;
    bool back_ir_data;
    int16_t right_analog_data;
+   int16_t front_analog_data;
 } ir_data_t;
 
 void init_IR(void);
 ir_data_t read_IR(void);
 static int read_adc(void);
+static int read_adc_front(void);
 static void configure_adc(void);
+int16_t return_analog();
+int16_t return_analog_front();

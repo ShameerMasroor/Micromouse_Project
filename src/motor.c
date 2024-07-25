@@ -203,13 +203,13 @@ void turn_right(){
 
     while (feedback.left_enc_count<encoder_left_count){
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
-        printf("Encoder left count: %d \n", encoder_left_count);
-        printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        // printf("Encoder left count: %d \n", encoder_left_count);
+        // printf("Feedbacl count value %d \n", feedback.left_enc_count);
         gpio_pin_set_dt(&in1, 1);
         gpio_pin_set_dt(&in2, 0);
         gpio_pin_set_dt(&in3, 0);
         gpio_pin_set_dt(&in4, 1);
-        printf("Stuck in while loop\n");
+        // printf("Stuck in while loop\n");
     }
 
     setMotorDirection('h');
@@ -229,7 +229,7 @@ void turn_left(){
     k_sleep(K_MSEC(1000));
     int encoder_left_count=0;
     // if (turn_flag==1){
-    encoder_left_count = feedback.left_enc_count + 16;
+    encoder_left_count = feedback.left_enc_count + 14;
     // int current_left_encoder_count = feedback.left_enc_count;
     // }
 
@@ -240,13 +240,13 @@ void turn_left(){
 
     while (feedback.left_enc_count<encoder_left_count){
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
-        printf("Encoder left count: %d \n", encoder_left_count);
-        printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        // printf("Encoder left count: %d \n", encoder_left_count);
+        // printf("Feedbacl count value %d \n", feedback.left_enc_count);
         gpio_pin_set_dt(&in1,0 );
         gpio_pin_set_dt(&in2, 1);
         gpio_pin_set_dt(&in3, 1);
         gpio_pin_set_dt(&in4, 0);
-        printf("Stuck in while loop\n");
+        // printf("Stuck in while loop\n");
     }
 
     setMotorDirection('h');

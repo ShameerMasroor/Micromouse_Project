@@ -35,7 +35,7 @@ void control_thread(void)
         feedback.left_enc_count = sensor_data.left_enc_count;
         feedback.right_enc_count = sensor_data.right_enc_count;
         feedback.right_analog_ir = sensor_data.ir_data.right_analog_data;
-        feedback.command = 'f';
+        feedback.command = 'h';
 
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
         {

@@ -1,13 +1,25 @@
 #include "../include/sensing.h"
+#include <zephyr/drivers/gpio.h>
 // #include "../include/sensing_control_q.h"
 
 //static sensors_t sensor;
 static sensor_data_t sensor_data;
+#define LED0 DT_ALIAS(led0)
+static const struct gpio_dt_spec ctrl_led = GPIO_DT_SPEC_GET(LED0, gpios);
 
 K_MSGQ_DEFINE(sensing_control_q, sizeof(sensor_data_t), 10, 1);
 
 void initSensors() 
-{
+{   int ret;
+
+    ret = gpio_pin_configure_dt(&ctrl_led, GPIO_OUTPUT);
+    if (ret < 0) {
+        // k_mutex_lock(&uart_mutex, K_FOREVER);
+        printk("Error %d: failed to configure in1 pin\n", ret);
+        // k_mutex_unlock(&uart_mutex);
+        return; 
+    }
+
     init_IR();
     init_encoders();
     initIMU();
@@ -25,6 +37,8 @@ void readSensors()
     sensor_data.ref_yaw = return_ref_yaw();
     sensor_data.left_enc_count = return_left_enc_count();
     sensor_data.right_enc_count = return_right_enc_count();
+    gpio_pin_toggle_dt(&ctrl_led);
+    printk("Blah\n");
     // sensor_data.encoder_left_count = encoders.left_encoder_count;
     // sensor_data.encoder_right_count = encoders.right_encoder_count;
 
