@@ -339,8 +339,14 @@ zephyr_udc0: &usb {
     status = "okay";
 };
 
-
-
+&adc2 {
+    label = "ADC_2";
+    pinctrl-0 = <&adc2_in3_pa6>;
+    pinctrl-names = "default";
+    st,adc-clock-source = <SYNC>;
+    st,adc-prescaler = <2>;
+    status = "okay";
+};
 
 &die_temp {
 	status = "okay";
