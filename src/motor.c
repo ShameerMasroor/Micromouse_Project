@@ -170,16 +170,13 @@ void motor_thread(void)
 
         // printk("Motor direction setting\n");
         // if (release_return() & !return_go_forward()){
+        if (feedback.command =='f'){
+            move_one_cell();
+        }
+        else{
         setMotorDirection(feedback.command);
-        // turn_flag =1;
-        // }
-
-        // else if (return_go_forward()){
-        //     setMotorDirection('f');
-        //     k_sleep(K_MSEC(1000));
-        //     set_return_go_forward(0);
-        // }
-
+        }
+        
         
     }
 
@@ -221,6 +218,28 @@ void turn_right(){
     setMotorDirection('h');
     
 }
+
+void move_one_cell(){
+    // int current_distance = 0;
+    int target_distance = feedback.distance + 18;
+
+    while(feedback.distance < target_distance){
+        k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
+        setMotorDirection('f');
+        // gpio_pin_set_dt(&in1,1 );
+        // gpio_pin_set_dt(&in2, 0);
+        // gpio_pin_set_dt(&in3, 1);
+        // gpio_pin_set_dt(&in4, 0);
+        printk("Distance covered: %d. To reach %d \n", feedback.distance, target_distance);
+    }
+
+    set_direction('h');
+    // set_Speed(0,0,&motor);
+    // k_sleep(K_MSEC(1000));
+    printk("Out of the while loop\n");
+      //look at this
+}
+
 
 
 void turn_left(){

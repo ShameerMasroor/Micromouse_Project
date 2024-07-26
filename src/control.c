@@ -36,7 +36,7 @@ void control_thread(void)
         feedback.right_enc_count = sensor_data.right_enc_count;
         feedback.right_analog_ir = sensor_data.ir_data.right_analog_data;
         feedback.distance = sensor_data.dist;
-        feedback.command = 'h';
+        feedback.command = 'f';
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
         {
             /* message queue is full: purge old data & try again */

@@ -102,7 +102,7 @@ static int read_adc_front(void) {
         printk("ADC front read failed with error %d\n", ret);
         return ret;
     }
-    printk("Front IR: %d \n", front_buffer[0]);
+    // printk("Front IR: %d \n", front_buffer[0]);
     return front_buffer[0];
 }
 

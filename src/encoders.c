@@ -143,8 +143,8 @@ double speed_matcher_right()
         //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
     encoders.right_encoder_count =0;
     
-    printk("Received ADC value %d \n", analog_ir_val);
-    printk("Received Front ADC value %d \n", front_analog_val);
+    // printk("Received ADC value %d \n", analog_ir_val);
+    // printk("Received Front ADC value %d \n", front_analog_val);
     return control_signal_right;
 }
 
@@ -185,12 +185,12 @@ double speed_matcher_left()
 double dia = 6.555;  // cm 
 double revolutions = 0; 
 // double circum = 3.14159 * dia;
-double dist = 0;
+int dist = 0;
 
-double distance()
+int distance()
 {
     revolutions = (encoders.rotation_left_counter + encoders.rotation_right_counter) * 1.03 / 40;
-    dist = dia * 3.14159 * revolutions;
+    dist = (int)(dia * 3.14159 * revolutions);
     // printf("Distance: %lf \n", dist);
     return dist;
 }
