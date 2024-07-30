@@ -83,6 +83,8 @@ static double error_sum = 0;
 
 const double set_pointRPM = 90;
 
+bool startup_flag = 1;
+
 
 double clamp(double value, double min, double max) {
     if (value < min) return min;
@@ -99,36 +101,47 @@ double get_time_diff()
     return time_diff;
 }
 
-const double KP = 0.05;
-const double KI = 0.005;
+const double KP = 0.005;
+const double KI = 0.0005;
 const double KD = 0.0;
 const double DT = 0.05;
 const double MAX_OUT = 0.75;
-const double IR_SCALE_RIGHT_P = 0.0304;
+const double IR_SCALE_RIGHT_P = 0.000016;
 // const double IR_SCALE_RIGHT_D = 0.00033;
-const double IR_SCALE_LEFT_P = 0.0302;
+const double IR_SCALE_LEFT_P = 0.000019;
 // const double IR_SCALE_LEFT_D = 0.00033;
 const double IR_SETPOINT = 300;
 static double ir_difference=0;
 static double last_error_ir=0;
 
+const double scale_p_right = 0.67;
+const double scale_i_right = 0.7;
+
+const double scale_p_left = 0.65;
+const double scale_i_left = 0.65;  
+
 bool controller_state=1;
 
 double speed_matcher_right()
 {
+    if (startup_flag==1){
+        startup_flag=0;
+        return 0.29;
+    }
 
     if (controller_state){
     int16_t analog_ir_val = return_analog();
     int16_t front_analog_val = return_analog_front();
-    const double scale_p_right = 0.5;
-    const double scale_i_right = 0.5;
+    
+
+    
 
     int32_t  delta_slit;
     delta_slit = encoders.right_encoder_count; 
     float partial_rot = 0.0;
     partial_rot = (float)delta_slit/20.0f;
     double current_right_rpm = (double)(partial_rot*600.0f);
-    double base_pwm_r = 0.2;
+    double base_pwm_r = 0.3;
     double time_diff = 0.001;//get_time_diff();
     error = (set_pointRPM - current_right_rpm); // error between the two motors
     ir_error = (IR_SETPOINT - analog_ir_val);
@@ -140,14 +153,14 @@ double speed_matcher_right()
     
     // control_signal_right = base_pwm_r + (scale_p_right * KP * (error+IR_SCALE_RIGHT*ir_error) + scale_i_right * KI * (error_sum+IR_SCALE_RIGHT*ir_error_sum) * DT);  // PID controller
     control_signal_right = base_pwm_r + (scale_p_right * KP * (error) + scale_i_right * KI * (error_sum) * DT) + IR_SCALE_RIGHT_P*ir_error ;
-    control_signal_right = clamp(control_signal_right, base_pwm_r, MAX_OUT);  // Ensure control signal stays within [0, 1]
+    control_signal_right = clamp(control_signal_right, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
     
-    // printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
+    printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
     // printf("Right control signal: %lf\n", control_s600ignal_right);
         //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
     encoders.right_encoder_count =0;
     
-    // printk("Received ADC value %d \n", analog_ir_val);
+    printk("Received ADC value %d \n", analog_ir_val);
     // printk("Received Front ADC value %d \n", front_analog_val);
     }
     return control_signal_right;
@@ -164,13 +177,17 @@ static double control_signal_left;
 
 double speed_matcher_left()
 {   
+    if (startup_flag==1){
+        startup_flag=0;
+        return 0.53;
+    }
+
     if (controller_state){
     int16_t analog_ir_val = return_analog();
-    const double scale_p_left = 0.53;
-    const double scale_i_left = 0.53;   
+     
     double current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*600.0f;
 
-    double base_pwm_l = 0.25;
+    double base_pwm_l = 0.3;
     time_diff_left = 0.001;//get_time_diff();
     error_left = (set_pointRPM - current_left_rpm); // error between the two motors
     error_sum_left += error_left;
@@ -178,10 +195,10 @@ double speed_matcher_left()
     
     // control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
     control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) - IR_SCALE_LEFT_P*ir_error;
-    control_signal_left = clamp(control_signal_left, base_pwm_l, MAX_OUT);  // Ensure control signal stays within [0, 1]
-    // printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
+    control_signal_left = clamp(control_signal_left, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
+    printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
 
-    // printf("Right control signal: %lf\n", control_signal_right);
+    // printf("left control signal: %lf\n", control_signal_left);
     
     encoders.left_encoder_count =0;
     //printf("Left Motor Speed = %lf RPM \n", current_left_rpm);

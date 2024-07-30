@@ -89,7 +89,7 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
-            set_direction('f');
+            // set_direction('f');
             // printk("Going forwards\n");
             break;
 
@@ -189,27 +189,34 @@ void turn_right(){
     set_controller(0);
     setMotorDirection('h');
     k_sleep(K_MSEC(1000));
+    int counts = 16;
     int encoder_left_count=0;
+    int encoder_right_count = 0;
     // if (turn_flag==1){
-    encoder_left_count = feedback.left_enc_count + 14;
+    k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
+    encoder_left_count = feedback.left_enc_count + counts;
+    encoder_right_count = feedback.right_enc_count +counts;
     // int current_left_encoder_count = feedback.left_enc_count;
     // }
 
     // turn_flag=0;
-    percent_to_period_A = (0.4)*motor.enA.period;
-    percent_to_period_B = (0.4)*motor.enB.period;
+    percent_to_period_A = (0.7)*motor.enA.period;
+    percent_to_period_B = (0.7)*motor.enB.period;
     set_Speed(percent_to_period_A, percent_to_period_B, &motor);
 
     while (feedback.left_enc_count<encoder_left_count){
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
-        // printf("Encoder left count: %d \n", encoder_left_count);
-        // printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        printf("Encoder left count: %d \n", encoder_left_count);
+        printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        
         gpio_pin_set_dt(&in1, 1);
         gpio_pin_set_dt(&in2, 0);
         gpio_pin_set_dt(&in3, 0);
         gpio_pin_set_dt(&in4, 1);
-        // printf("Stuck in while loop\n");
+        printf("Stuck in while loop\n");
     }
+
+    
 
     setMotorDirection('h');
     k_sleep(K_MSEC(1000));
@@ -218,13 +225,13 @@ void turn_right(){
     
     k_sleep(K_MSEC(700));
     setMotorDirection('h');
-    set_controller(1);
+    // set_controller(1);
     
 }
 
 void move_one_cell(){
     // int current_distance = 0;
-    // set_controller(1);
+    set_controller(1);
     int target_distance = feedback.distance + 18;
 
     while(feedback.distance < target_distance){
@@ -234,12 +241,12 @@ void move_one_cell(){
         // gpio_pin_set_dt(&in2, 0);
         // gpio_pin_set_dt(&in3, 1);
         // gpio_pin_set_dt(&in4, 0);
-        printk("Distance covered: %d. To reach %d \n", feedback.distance, target_distance);
+        // printk("Distance covered: %d. To reach %d \n", feedback.distance, target_distance);
     }
 
 
-    set_direction('h');
-    // set_controller(0);
+    setMotorDirection('h');
+    set_controller(0);
     set_Speed(0,0,&motor);
     
     k_sleep(K_MSEC(1000));
@@ -248,42 +255,47 @@ void move_one_cell(){
 }
 
 
-
 void turn_left(){
-    
     set_controller(0);
     setMotorDirection('h');
     k_sleep(K_MSEC(1000));
+    int counts = 14;
     int encoder_left_count=0;
+    int encoder_right_count = 0;
     // if (turn_flag==1){
-    encoder_left_count = feedback.left_enc_count + 14;
+    k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
+    encoder_left_count = feedback.left_enc_count + counts;
+    encoder_right_count = feedback.right_enc_count +counts;
     // int current_left_encoder_count = feedback.left_enc_count;
     // }
 
     // turn_flag=0;
-    percent_to_period_A = (0.4)*motor.enA.period;
-    percent_to_period_B = (0.4)*motor.enB.period;
+    percent_to_period_A = (0.7)*motor.enA.period;
+    percent_to_period_B = (0.7)*motor.enB.period;
     set_Speed(percent_to_period_A, percent_to_period_B, &motor);
 
     while (feedback.left_enc_count<encoder_left_count){
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
-        // printf("Encoder left count: %d \n", encoder_left_count);
-        // printf("Feedbacl count value %d \n", feedback.left_enc_count);
-        gpio_pin_set_dt(&in1,0 );
+        printf("Encoder left count: %d \n", encoder_left_count);
+        printf("Feedbacl count value %d \n", feedback.left_enc_count);
+        
+        gpio_pin_set_dt(&in1, 0);
         gpio_pin_set_dt(&in2, 1);
         gpio_pin_set_dt(&in3, 1);
         gpio_pin_set_dt(&in4, 0);
-        // printf("Stuck in while loop\n");
+        printf("Stuck in while loop\n");
     }
+
+    
 
     setMotorDirection('h');
     k_sleep(K_MSEC(1000));
 
     setMotorDirection('f');
     
-    k_sleep(K_MSEC(1000));
+    k_sleep(K_MSEC(700));
     setMotorDirection('h');
-    set_controller(1);
+    // set_controller(1);
     
 }
 
