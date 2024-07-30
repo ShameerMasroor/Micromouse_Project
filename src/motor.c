@@ -1,7 +1,8 @@
 #include "../include/motor.h"
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
-#include <zephyr/drivers/pwm.h>
+#include <zephyr/drivers/pwm.h>'
+#include "../include/encoders.h"
 
 
 #define STACKSIZE 2048
@@ -171,6 +172,7 @@ void motor_thread(void)
         // printk("Motor direction setting\n");
         // if (release_return() & !return_go_forward()){
         if (feedback.command =='f'){
+            
             move_one_cell();
         }
         else{
@@ -184,7 +186,7 @@ void motor_thread(void)
 }
 
 void turn_right(){
-    
+    set_controller(0);
     setMotorDirection('h');
     k_sleep(K_MSEC(1000));
     int encoder_left_count=0;
@@ -216,11 +218,13 @@ void turn_right(){
     
     k_sleep(K_MSEC(700));
     setMotorDirection('h');
+    set_controller(1);
     
 }
 
 void move_one_cell(){
     // int current_distance = 0;
+    // set_controller(1);
     int target_distance = feedback.distance + 18;
 
     while(feedback.distance < target_distance){
@@ -233,9 +237,12 @@ void move_one_cell(){
         printk("Distance covered: %d. To reach %d \n", feedback.distance, target_distance);
     }
 
+
     set_direction('h');
-    // set_Speed(0,0,&motor);
-    // k_sleep(K_MSEC(1000));
+    // set_controller(0);
+    set_Speed(0,0,&motor);
+    
+    k_sleep(K_MSEC(1000));
     printk("Out of the while loop\n");
       //look at this
 }
@@ -244,6 +251,7 @@ void move_one_cell(){
 
 void turn_left(){
     
+    set_controller(0);
     setMotorDirection('h');
     k_sleep(K_MSEC(1000));
     int encoder_left_count=0;
@@ -275,6 +283,7 @@ void turn_left(){
     
     k_sleep(K_MSEC(1000));
     setMotorDirection('h');
+    set_controller(1);
     
 }
 

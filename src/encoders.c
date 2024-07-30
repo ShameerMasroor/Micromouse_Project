@@ -104,16 +104,20 @@ const double KI = 0.005;
 const double KD = 0.0;
 const double DT = 0.05;
 const double MAX_OUT = 0.75;
-const double IR_SCALE_RIGHT_P = 0.00014;
+const double IR_SCALE_RIGHT_P = 0.0304;
 // const double IR_SCALE_RIGHT_D = 0.00033;
-const double IR_SCALE_LEFT_P = 0.00022;
+const double IR_SCALE_LEFT_P = 0.0302;
 // const double IR_SCALE_LEFT_D = 0.00033;
-const double IR_SETPOINT = 270;
+const double IR_SETPOINT = 300;
 static double ir_difference=0;
 static double last_error_ir=0;
 
+bool controller_state=1;
+
 double speed_matcher_right()
 {
+
+    if (controller_state){
     int16_t analog_ir_val = return_analog();
     int16_t front_analog_val = return_analog_front();
     const double scale_p_right = 0.5;
@@ -145,6 +149,7 @@ double speed_matcher_right()
     
     // printk("Received ADC value %d \n", analog_ir_val);
     // printk("Received Front ADC value %d \n", front_analog_val);
+    }
     return control_signal_right;
 }
 
@@ -159,6 +164,7 @@ static double control_signal_left;
 
 double speed_matcher_left()
 {   
+    if (controller_state){
     int16_t analog_ir_val = return_analog();
     const double scale_p_left = 0.53;
     const double scale_i_left = 0.53;   
@@ -179,6 +185,7 @@ double speed_matcher_left()
     
     encoders.left_encoder_count =0;
     //printf("Left Motor Speed = %lf RPM \n", current_left_rpm);
+    }
     return control_signal_left;
 }
 
@@ -214,4 +221,8 @@ int return_left_enc_count(){
 
 int return_right_enc_count(){
     return encoders.rotation_right_counter;
+}
+
+void set_controller(bool flag){
+    controller_state = flag;
 }
