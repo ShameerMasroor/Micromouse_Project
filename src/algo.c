@@ -10,19 +10,19 @@ char right_hand_follower(sensor_data_t *received_data)
     bool ir_front_state = received_data->ir_data.front_ir_data;
     rd = received_data->dist;
     cell = (int)(rd/18.0);
-    printk("Cell: %d \n", cell);
+    // printk("Cell: %d \n", cell);
     
-    printf("Distance: %lf \n", rd);
+    // printf("Distance: %lf \n", rd);
     if (ir_right_state && !ir_front_state){
-        printk("Go forward\n");
+        // printk("Go forward\n");
         return 'f';
     }
     else if (ir_right_state && ir_front_state){
-        printk("Go left\n");
+        // printk("Go left\n");
         return 'l';
     }
     else if (!ir_right_state){
-        printk("Go right\n");
+        // printk("Go right\n");
         return 'r';
     }
 

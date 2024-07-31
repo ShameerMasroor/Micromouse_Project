@@ -30,6 +30,9 @@ typedef struct
     int right_enc_count;
     int16_t right_analog_ir;
     int distance;
+    bool right_ir;
+    bool front_ir;
+    int front_ir_analog;
 } feedback_t;
 
 void init_motors(void);

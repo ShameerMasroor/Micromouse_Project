@@ -36,6 +36,9 @@ void control_thread(void)
         feedback.right_enc_count = sensor_data.right_enc_count;
         feedback.right_analog_ir = sensor_data.ir_data.right_analog_data;
         feedback.distance = sensor_data.dist;
+        feedback.right_ir = sensor_data.ir_data.right_ir_data;
+        feedback.front_ir = sensor_data.ir_data.front_ir_data;
+        feedback.front_ir_analog = sensor_data.ir_data.front_analog_data;
         // feedback.command = 'f';
         while (k_msgq_put(&motor_control_q, &feedback, K_NO_WAIT) != 0)
         {

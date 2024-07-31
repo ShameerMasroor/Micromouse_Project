@@ -106,9 +106,9 @@ const double KI = 0.0005;
 const double KD = 0.0;
 const double DT = 0.05;
 const double MAX_OUT = 0.75;
-const double IR_SCALE_RIGHT_P = 0.000016;
+const double IR_SCALE_RIGHT_P = 0.000033;
 // const double IR_SCALE_RIGHT_D = 0.00033;
-const double IR_SCALE_LEFT_P = 0.000019;
+const double IR_SCALE_LEFT_P = 0.000030;
 // const double IR_SCALE_LEFT_D = 0.00033;
 const double IR_SETPOINT = 300;
 static double ir_difference=0;
@@ -160,8 +160,8 @@ double speed_matcher_right()
         //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
     encoders.right_encoder_count =0;
     
-    printk("Received ADC value %d \n", analog_ir_val);
-    // printk("Received Front ADC value %d \n", front_analog_val);
+    // printk("Received ADC value %d \n", analog_ir_val);
+    printk("Received Front ADC value %d \n", front_analog_val);
     }
     return control_signal_right;
 }
