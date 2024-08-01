@@ -122,6 +122,7 @@ const double scale_i_left = 0.65;
 
 bool controller_state=1;
 
+
 double speed_matcher_right()
 {
     if (startup_flag==1){
@@ -130,10 +131,11 @@ double speed_matcher_right()
     }
 
     if (controller_state){
+    // error_averager();
     int16_t analog_ir_val = return_analog();
     int16_t front_analog_val = return_analog_front();
     
-
+    
     
 
     int32_t  delta_slit;
@@ -144,7 +146,7 @@ double speed_matcher_right()
     double base_pwm_r = 0.3;
     double time_diff = 0.001;//get_time_diff();
     error = (set_pointRPM - current_right_rpm); // error between the two motors
-    ir_error = (IR_SETPOINT - analog_ir_val);
+    ir_error = (analog_ir_val - front_analog_val);
     ir_error_sum +=ir_error;
     error_sum += error;
     ir_difference = ir_error-last_error_ir;
@@ -183,7 +185,9 @@ double speed_matcher_left()
     }
 
     if (controller_state){
-    int16_t analog_ir_val = return_analog();
+    int16_t analog_ir_right_val = return_analog();
+    int16_t analog_ir_left_val = return_analog_front();
+    int16_t ir_error_val = analog_ir_right_val - analog_ir_left_val;
      
     double current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*600.0f;
 
@@ -194,7 +198,7 @@ double speed_matcher_left()
 
     
     // control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
-    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) - IR_SCALE_LEFT_P*ir_error;
+    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) - IR_SCALE_LEFT_P*ir_error_val;
     control_signal_left = clamp(control_signal_left, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
     // printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
 
@@ -242,4 +246,22 @@ int return_right_enc_count(){
 
 void set_controller(bool flag){
     controller_state = flag;
+}
+
+
+int error_averager(){
+int error_sum=0;
+int count=0;
+int error_diff = 0;
+while (1){
+error_diff = return_analog() - return_analog_front();
+error_sum += error_diff;
+count++;
+
+printk("Error difference = %d, Error Sum = %d \n", error_diff, error_sum);
+}
+
+int averaged_error = (int)(error_sum/count);
+
+return averaged_error;
 }
