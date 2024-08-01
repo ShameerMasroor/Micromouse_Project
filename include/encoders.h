@@ -26,4 +26,5 @@ int distance();
 int return_left_enc_count();
 int return_right_enc_count();
 void set_controller(bool flag);
+void turn_returner(char turn);
 

@@ -101,15 +101,24 @@ double get_time_diff()
     return time_diff;
 }
 
-const double KP = 0.005;
+const double KP = 0.02;
 const double KI = 0.0005;
 const double KD = 0.0;
 const double DT = 0.05;
 const double MAX_OUT = 0.75;
-const double IR_SCALE_RIGHT_P = 0.000033;
-// const double IR_SCALE_RIGHT_D = 0.00033;
-const double IR_SCALE_LEFT_P = 0.000030;
-// const double IR_SCALE_LEFT_D = 0.00033;
+
+//for forward movement
+double IR_SCALE_RIGHT_P = 0.00009;
+double IR_SCALE_LEFT_P = 0.0001;
+
+// for right turns
+double IR_SCALE_RIGHT_P_R_TURN = 0.00009;
+double IR_SCALE_LEFT_P_R_TURN = 0.00017;
+
+//for left turns
+double IR_SCALE_RIGHT_P_L_TURN = 0.00009;
+double IR_SCALE_LEFT_P_L_TURN = 0.00017;
+
 const double IR_SETPOINT = 300;
 static double ir_difference=0;
 static double last_error_ir=0;
@@ -117,8 +126,8 @@ static double last_error_ir=0;
 const double scale_p_right = 0.67;
 const double scale_i_right = 0.7;
 
-const double scale_p_left = 0.65;
-const double scale_i_left = 0.65;  
+const double scale_p_left = 0.57;
+const double scale_i_left = 0.57;  
 
 bool controller_state=1;
 
@@ -130,7 +139,19 @@ double speed_matcher_right()
         return 0.29;
     }
 
-    if (controller_state){
+    if (turn_returner=='r'){
+        IR_SCALE_RIGHT_P = IR_SCALE_RIGHT_P_R_TURN;
+    }
+
+    if (turn_returner=='l'){
+        IR_SCALE_RIGHT_P = IR_SCALE_RIGHT_P_L_TURN;
+    }
+
+    if (turn_returner=='f'){
+        IR_SCALE_RIGHT_P = 0.00009;
+    }
+
+    if (controller_state==1){
     // error_averager();
     int16_t analog_ir_val = return_analog();
     int16_t front_analog_val = return_analog_front();
@@ -143,10 +164,10 @@ double speed_matcher_right()
     float partial_rot = 0.0;
     partial_rot = (float)delta_slit/20.0f;
     double current_right_rpm = (double)(partial_rot*600.0f);
-    double base_pwm_r = 0.3;
+    double base_pwm_r = 0.0;
     double time_diff = 0.001;//get_time_diff();
     error = (set_pointRPM - current_right_rpm); // error between the two motors
-    ir_error = (analog_ir_val - front_analog_val);
+    ir_error = (analog_ir_val -front_analog_val);
     ir_error_sum +=ir_error;
     error_sum += error;
     ir_difference = ir_error-last_error_ir;
@@ -154,17 +175,16 @@ double speed_matcher_right()
 
     
     // control_signal_right = base_pwm_r + (scale_p_right * KP * (error+IR_SCALE_RIGHT*ir_error) + scale_i_right * KI * (error_sum+IR_SCALE_RIGHT*ir_error_sum) * DT);  // PID controller
-    control_signal_right = base_pwm_r + (scale_p_right * KP * (error) + scale_i_right * KI * (error_sum) * DT) + IR_SCALE_RIGHT_P*ir_error ;
+    control_signal_right = base_pwm_r + (scale_p_right * KP * (error) + scale_i_right * KI * (error_sum) * DT) - IR_SCALE_RIGHT_P*ir_error ;
     control_signal_right = clamp(control_signal_right, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
     
-    // printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
     // printf("Right control signal: %lf\n", control_s600ignal_right);
         //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
     encoders.right_encoder_count =0;
     
-    printk("Received right ADC value %d \n", analog_ir_val);
-    printk("Received Front ADC value %d \n", front_analog_val);
+    printf("Right IR = %d, left IR = %d right ctrl = %lf, right enc = %lf \n", analog_ir_val, front_analog_val, control_signal_right, current_right_rpm);
     }
+
     return control_signal_right;
 }
 
@@ -184,23 +204,35 @@ double speed_matcher_left()
         return 0.53;
     }
 
-    if (controller_state){
-    int16_t analog_ir_right_val = return_analog();
-    int16_t analog_ir_left_val = return_analog_front();
-    int16_t ir_error_val = analog_ir_right_val - analog_ir_left_val;
+    if (turn_returner=='r'){
+        IR_SCALE_LEFT_P = IR_SCALE_LEFT_P_R_TURN;
+    }
+
+    if (turn_returner=='l'){
+        IR_SCALE_LEFT_P = IR_SCALE_LEFT_P_L_TURN;
+    }
+
+    if (turn_returner=='f'){
+        IR_SCALE_LEFT_P = 0.0001;
+    }
+
+    if (controller_state==1){
+    // int16_t analog_ir_right_val = return_analog();
+    // int16_t analog_ir_left_val = return_analog_front();
+    // int16_t ir_error_val = 292 - analog_ir_left_val;
      
     double current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*600.0f;
 
-    double base_pwm_l = 0.3;
+    double base_pwm_l = 0.0;
     time_diff_left = 0.001;//get_time_diff();
     error_left = (set_pointRPM - current_left_rpm); // error between the two motors
     error_sum_left += error_left;
 
     
     // control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
-    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) - IR_SCALE_LEFT_P*ir_error_val;
+    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) + IR_SCALE_LEFT_P*ir_error;
     control_signal_left = clamp(control_signal_left, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
-    // printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
+    printf("LEFT ctrl = %lf, LEFT enc = %lf \n", control_signal_left, current_left_rpm);
 
     // printf("left control signal: %lf\n", control_signal_left);
     
@@ -264,4 +296,10 @@ printk("Error difference = %d, Error Sum = %d \n", error_diff, error_sum);
 int averaged_error = (int)(error_sum/count);
 
 return averaged_error;
+}
+
+char turn_taken;
+
+void turn_returner(char turn){
+    turn_taken = turn;
 }

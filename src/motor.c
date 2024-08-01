@@ -89,6 +89,7 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in2, 0);
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
+            turn_returner('f');
             // set_direction('f');
             // printk("Going forwards\n");
             break;
@@ -107,13 +108,9 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
             printk("Going right\n");
-            // set_direction('r');
-            turn_right();
-            // while (release_return()==0){
-
-            // }
-
-            // right_turn();
+            turn_returner('r');
+            // turn_right();
+        
             break;
 
         case 'l':  //left
@@ -122,8 +119,9 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in3, 1);
             gpio_pin_set_dt(&in4, 0);
             printk("Going left\n");
+            turn_returner('l');
             // set_direction('l');
-            turn_left();
+            // turn_left();
             
             break;
 
@@ -171,13 +169,13 @@ void motor_thread(void)
 
         // printk("Motor direction setting\n");
         // if (release_return() & !return_go_forward()){
-        if (feedback.command =='f'){
+        // if (feedback.command =='f'){
             
-            move_one_cell();
-        }
-        else{
+        //     //move_one_cell();
+        // }
+        // else{
         setMotorDirection(feedback.command);
-        }
+        // }
         
         
     }
@@ -256,7 +254,7 @@ void turn_right(){
     
 }
 
-void move_one_cell(){
+/*void move_one_cell(){
     // int current_distance = 0;
     set_controller(1);
     int target_distance = feedback.distance + 18;
@@ -281,7 +279,7 @@ void move_one_cell(){
       //look at this
 }
 
-
+*/
 void turn_left(){
     set_controller(0);
     setMotorDirection('h');
@@ -342,7 +340,7 @@ void turn_left(){
     k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
 
     while (feedback.right_ir !=0){
-        move_one_cell();
+        // move_one_cell();
         k_msgq_get(&motor_control_q, &feedback, K_FOREVER);
     }
     // setMotorDirection('f');
