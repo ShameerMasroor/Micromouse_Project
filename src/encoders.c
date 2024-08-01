@@ -155,12 +155,12 @@ double speed_matcher_right()
     control_signal_right = base_pwm_r + (scale_p_right * KP * (error) + scale_i_right * KI * (error_sum) * DT) + IR_SCALE_RIGHT_P*ir_error ;
     control_signal_right = clamp(control_signal_right, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
     
-    printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
+    // printf("\tControl signal for right: %lf current_right_rpm = %lf \n", control_signal_right, current_right_rpm);
     // printf("Right control signal: %lf\n", control_s600ignal_right);
         //printf("\tRight Motor Speed = %lf RPM \n", current_right_rpm);
     encoders.right_encoder_count =0;
     
-    // printk("Received ADC value %d \n", analog_ir_val);
+    printk("Received right ADC value %d \n", analog_ir_val);
     printk("Received Front ADC value %d \n", front_analog_val);
     }
     return control_signal_right;
@@ -196,7 +196,7 @@ double speed_matcher_left()
     // control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
     control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) - IR_SCALE_LEFT_P*ir_error;
     control_signal_left = clamp(control_signal_left, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
-    printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
+    // printf("Control signal for left: %lf current_left_rpm = %lf \n", control_signal_left, current_left_rpm);
 
     // printf("left control signal: %lf\n", control_signal_left);
     
