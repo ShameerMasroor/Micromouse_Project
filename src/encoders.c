@@ -259,7 +259,7 @@ double speed_matcher_left()
     }
     return control_signal_left;
 }
-
+ 
 void  ctrl_signal_generator(double *pwm_left, double *pwm_right){
     int16_t right_ir = return_analog();
     int16_t left_ir = return_analog_front();
