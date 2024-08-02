@@ -106,18 +106,20 @@ const double KI = 0.0005;
 const double KD = 0.0;
 const double DT = 0.05;
 const double MAX_OUT = 0.75;
+char turn_taken;
 
 //for forward movement
-double IR_SCALE_RIGHT_P = 0.00009;
-double IR_SCALE_LEFT_P = 0.0001;
+double IR_SCALE_RIGHT_P = 0.0009;
+double IR_SCALE_LEFT_P = 0.001;
 
 // for right turns
-double IR_SCALE_RIGHT_P_R_TURN = 0.00009;
-double IR_SCALE_LEFT_P_R_TURN = 0.00017;
+double IR_SCALE_RIGHT_P_R_TURN = 0.00027;
+double IR_SCALE_LEFT_P_R_TURN = 0.00018;
 
 //for left turns
-double IR_SCALE_RIGHT_P_L_TURN = 0.00009;
-double IR_SCALE_LEFT_P_L_TURN = 0.00017;
+double IR_SCALE_RIGHT_P_L_TURN = 0.00020;
+double IR_SCALE_LEFT_P_L_TURN = 0.00027;
+
 
 const double IR_SETPOINT = 300;
 static double ir_difference=0;
@@ -134,22 +136,25 @@ bool controller_state=1;
 
 double speed_matcher_right()
 {
-    if (startup_flag==1){
-        startup_flag=0;
-        return 0.29;
-    }
+    // if (startup_flag==1){
+    //     startup_flag=0;
+    //     return 0.29;
+    // }
 
-    if (turn_returner=='r'){
+    /*if (turn_taken=='r'){
         IR_SCALE_RIGHT_P = IR_SCALE_RIGHT_P_R_TURN;
+        printk("Turn Right!!! \n");
     }
 
-    if (turn_returner=='l'){
+    if (turn_taken=='l'){
         IR_SCALE_RIGHT_P = IR_SCALE_RIGHT_P_L_TURN;
+        printk("Turn Left!!! \n");
     }
 
-    if (turn_returner=='f'){
+    if (turn_taken=='f'){
         IR_SCALE_RIGHT_P = 0.00009;
-    }
+        IR_SCALE_LEFT_P = 0.0001;
+    }*/
 
     if (controller_state==1){
     // error_averager();
@@ -173,6 +178,9 @@ double speed_matcher_right()
     ir_difference = ir_error-last_error_ir;
     last_error_ir = ir_error;
 
+    if(ir_error > 100){
+        return 0.0f;
+    }
     
     // control_signal_right = base_pwm_r + (scale_p_right * KP * (error+IR_SCALE_RIGHT*ir_error) + scale_i_right * KI * (error_sum+IR_SCALE_RIGHT*ir_error_sum) * DT);  // PID controller
     control_signal_right = base_pwm_r + (scale_p_right * KP * (error) + scale_i_right * KI * (error_sum) * DT) - IR_SCALE_RIGHT_P*ir_error ;
@@ -197,26 +205,36 @@ static double time_diff_left;
 static double error_sum_left;
 static double control_signal_left;
 
+
 double speed_matcher_left()
 {   
-    if (startup_flag==1){
-        startup_flag=0;
-        return 0.53;
-    }
 
-    if (turn_returner=='r'){
+    // if (startup_flag==1){
+    //     startup_flag=0;
+    //     return 0.53;
+    // }
+
+    /*if (turn_taken=='r'){
         IR_SCALE_LEFT_P = IR_SCALE_LEFT_P_R_TURN;
     }
 
-    if (turn_returner=='l'){
+    if (turn_taken=='l'){
         IR_SCALE_LEFT_P = IR_SCALE_LEFT_P_L_TURN;
     }
 
-    if (turn_returner=='f'){
+    if (turn_taken=='f'){
+        IR_SCALE_RIGHT_P = 0.00009;
         IR_SCALE_LEFT_P = 0.0001;
     }
-
+    */
     if (controller_state==1){
+    int16_t analog_ir_val = return_analog();
+    int16_t front_analog_val = return_analog_front();
+    int16_t  ir_err  = (analog_ir_val -front_analog_val);
+
+    if(ir_err > 100){
+        return 0.0f;
+    }
     // int16_t analog_ir_right_val = return_analog();
     // int16_t analog_ir_left_val = return_analog_front();
     // int16_t ir_error_val = 292 - analog_ir_left_val;
@@ -230,7 +248,7 @@ double speed_matcher_left()
 
     
     // control_signal_left = base_pwm_l + (scale_p_left * KP * (error-IR_SCALE_LEFT*ir_error) + scale_i_left * KI * (error_sum-IR_SCALE_LEFT*ir_error_sum) * DT) ;  // PID controller
-    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) + IR_SCALE_LEFT_P*ir_error;
+    control_signal_left = base_pwm_l + (scale_p_left * KP * (error) + scale_i_left * KI * (error_sum) * DT) + IR_SCALE_LEFT_P*ir_err;
     control_signal_left = clamp(control_signal_left, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
     printf("LEFT ctrl = %lf, LEFT enc = %lf \n", control_signal_left, current_left_rpm);
 
@@ -240,6 +258,39 @@ double speed_matcher_left()
     //printf("Left Motor Speed = %lf RPM \n", current_left_rpm);
     }
     return control_signal_left;
+}
+
+void  ctrl_signal_generator(double *pwm_left, double *pwm_right){
+    int16_t right_ir = return_analog();
+    int16_t left_ir = return_analog_front();
+    int16_t  difference_ir  = (right_ir - left_ir);
+    double current_left_rpm = 0.0;
+    double current_right_rpm = 0.0;
+        /* LEFT motor PID */
+    double  left_enc_error = 0.0, left_enc_error_sum = 0.0, ctrl_sig_left = 0.0;
+    current_left_rpm = (double)(encoders.left_encoder_count/20.0f)*600.0f;
+    left_enc_error = (set_pointRPM - current_left_rpm); // error between the two motors
+    left_enc_error_sum += left_enc_error;
+    ctrl_sig_left = (scale_p_left * KP * (left_enc_error) + scale_i_left * KI * (left_enc_error_sum) * DT) + IR_SCALE_LEFT_P*difference_ir;
+    ctrl_sig_left = clamp(ctrl_sig_left, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
+    *pwm_left = ctrl_sig_left;
+        /* RIGHT motor PID */
+    double  right_enc_error = 0.0, right_enc_error_sum = 0.0, ctrl_sig_right;
+    current_right_rpm = (double)(encoders.right_encoder_count/20.0f)*600.0f;
+    right_enc_error = (set_pointRPM - current_right_rpm); // error between the two motors
+    right_enc_error_sum += right_enc_error;
+    ctrl_sig_right = (scale_p_right * KP * (right_enc_error) + scale_i_right * KI * (right_enc_error_sum) * DT) - IR_SCALE_RIGHT_P*difference_ir ;
+    ctrl_sig_right = clamp(ctrl_sig_right, 0, MAX_OUT);  // Ensure control signal stays within [0, 1]
+    *pwm_right = ctrl_sig_right;
+        /* Reset encoders */    
+    encoders.left_encoder_count =0;
+    encoders.right_encoder_count =0;
+        /*Debug related */
+    printf("LEFT ctrl = %lf, RIGHT ctrl = %lf, ir_diff = %d, LEFT_enc = %lf, RIGHT_enc =%lf, ir_left = %d, ir_right = %d \n", 
+                                                                ctrl_sig_left, ctrl_sig_right, 
+                                                                difference_ir, current_left_rpm, current_right_rpm,
+                                                                left_ir, right_ir);
+    return;
 }
 
 double dia = 6.555;  // cm 
@@ -298,7 +349,7 @@ int averaged_error = (int)(error_sum/count);
 return averaged_error;
 }
 
-char turn_taken;
+
 
 void turn_returner(char turn){
     turn_taken = turn;

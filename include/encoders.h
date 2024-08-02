@@ -20,6 +20,7 @@ void init_encoders();
 double speed_matcher_left();
 double speed_matcher_right();
 double general_speed_matcher();
+void  ctrl_signal_generator(double *pwm_left, double *pwm_right);
 void speed_detector();
 int distance();
 

@@ -28,9 +28,11 @@ void initSensors()
 
 void readSensors() 
 {
+    //sensor_data.ir_data = read_IR();
+    //sensor_data.encoder_data_right = speed_matcher_right();
     sensor_data.ir_data = read_IR();
-    sensor_data.encoder_data_left = speed_matcher_left();
-    sensor_data.encoder_data_right = speed_matcher_right();
+    ctrl_signal_generator(&sensor_data.encoder_data_left , &sensor_data.encoder_data_right);
+    //sensor_data.encoder_data_left = speed_matcher_left();
     sensor_data.yaw_controlled_pwm_right = direction_controller_right();
     sensor_data.yaw_controlled_pwm_left = direction_controller_left();
     sensor_data.yaw_angle = readIMU();

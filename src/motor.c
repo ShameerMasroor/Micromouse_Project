@@ -99,26 +99,26 @@ void setMotorDirection(char direction)
             gpio_pin_set_dt(&in2, 1);
             gpio_pin_set_dt(&in3, 0);
             gpio_pin_set_dt(&in4, 1);
-            printk("Going backwards\n");
+            // printk("Going backwards\n");
             break;
 
         case 'r':  //right
-            gpio_pin_set_dt(&in1, 1);
-            gpio_pin_set_dt(&in2, 0);
-            gpio_pin_set_dt(&in3, 0);
-            gpio_pin_set_dt(&in4, 1);
-            printk("Going right\n");
+            // gpio_pin_set_dt(&in1, 1);
+            // gpio_pin_set_dt(&in2, 0);
+            // gpio_pin_set_dt(&in3, 0);
+            // gpio_pin_set_dt(&in4, 1);
+            // printk("Going right\n");
             turn_returner('r');
             // turn_right();
         
             break;
 
         case 'l':  //left
-            gpio_pin_set_dt(&in1,0 );
-            gpio_pin_set_dt(&in2, 1);
-            gpio_pin_set_dt(&in3, 1);
-            gpio_pin_set_dt(&in4, 0);
-            printk("Going left\n");
+            // gpio_pin_set_dt(&in1,0 );
+            // gpio_pin_set_dt(&in2, 1);
+            // gpio_pin_set_dt(&in3, 1);
+            // gpio_pin_set_dt(&in4, 0);
+            // printk("Going left\n");
             turn_returner('l');
             // set_direction('l');
             // turn_left();
